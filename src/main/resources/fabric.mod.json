@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "fguns",
+  "version": "${version}",
+
+  "name": "Flytre's Guns",
+  "description": "Adding simple but effective guns to fabric! Sounds by zapsplat.com",
+  "authors": [
+    "Flytre"
+  ],
+  "contact": {
+    "homepage": "https://flytre.net/",
+    "sources": "https://github.com/Flytre/flytre-guns"
+  },
+
+  "license": "ARR ~ Read LICENSE file",
+  "icon": "assets/fguns/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "net.flytre.fguns.FlytreGuns"
+    ],
+    "client" : [
+      "net.flytre.fguns.FlytreGunsClient"
+    ]
+  },
+  "mixins": [
+    "fguns.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.7.4",
+    "fabric": "*",
+    "minecraft": "1.16.x"
+  }
+}

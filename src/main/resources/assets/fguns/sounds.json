@@ -1,0 +1,137 @@
+{
+  "sniper.fire": {
+    "sounds": [
+      {
+        "name": "fguns:sniper/1",
+        "weight": 1
+      }
+    ]
+  },
+  "shotgun.fire": {
+    "sounds": [
+      {
+        "name": "fguns:shotgun/1"
+      }
+    ]
+  },
+  "target.burn": {
+    "sounds": [
+      {
+        "name": "fguns:target/1"
+      }
+    ]
+  },
+  "slime.fire": {
+    "sounds": [
+      {
+        "name": "fguns:slime/1"
+      }
+    ]
+  },
+  "rocket.fire": {
+    "sounds": [
+      {
+        "name": "fguns:rocket/1"
+      }
+    ]
+  },
+  "rifle.fire": {
+    "sounds": [
+      {
+        "name": "fguns:rifle/1",
+        "weight": 1
+      },
+      {
+        "name": "fguns:rifle/2",
+        "weight": 1
+      }
+    ]
+  },
+  "dry_fire": {
+    "sounds": [
+      {
+        "name": "fguns:dry_fire/1",
+        "weight": 1
+      }
+    ]
+  },
+  "shocker.fire": {
+    "sounds": [
+      {
+        "name": "fguns:shocker/2",
+        "weight": 1
+      }
+    ]
+  },
+  "shocker.hit": {
+    "sounds": [
+      {
+        "name": "fguns:shocker/1",
+        "weight": 1
+      }
+    ]
+  },
+  "pistol.fire": {
+    "sounds": [
+      {
+        "name": "fguns:pistol/1",
+        "weight": 1
+      }
+    ]
+  },
+  "saber.strike": {
+    "sounds": [
+      {
+        "name": "fguns:saber/1",
+        "weight": 1
+      },
+      {
+        "name": "fguns:saber/2",
+        "weight": 1
+      },
+      {
+        "name": "fguns:saber/3",
+        "weight": 1
+      }
+    ]
+  },
+  "hit": {
+    "sounds": [
+      {
+        "name": "fguns:hit/1"
+      }
+    ]
+  },
+  "button": {
+    "sounds": [
+      {
+        "name": "fguns:button/1",
+        "weight": 1000000
+      }
+    ]
+  },
+  "click": {
+    "sounds": [
+      {
+        "name": "fguns:button/2",
+        "weight": 1000000
+      }
+    ]
+  },
+  "explode": {
+    "sounds": [
+      {
+        "name": "fguns:explosion/1",
+        "weight": 1000000
+      }
+    ]
+  },
+  "beep": {
+    "sounds": [
+      {
+        "name": "fguns:beep/1",
+        "weight": 1000000
+      }
+    ]
+  }
+}

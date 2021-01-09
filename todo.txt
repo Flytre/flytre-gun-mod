@@ -1,0 +1,5 @@
+Friendly fire: Cannot hit same team
+Enchantments: Infinity enchantment etc.
+Gun NBT : make custom guns
+Sniper scope
+Gun soudnss

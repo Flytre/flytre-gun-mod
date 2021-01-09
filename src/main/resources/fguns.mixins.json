@@ -1,0 +1,21 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.flytre.fguns.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "LivingEntityMixin"
+  ],
+  "client": [
+    "ClientPlayNetworkHandlerMixin",
+    "HeldItemRendererMixin",
+    "ItemRendererMixin",
+    "GameRendererMixin",
+    "ClientWorldMixin",
+    "InGameHudMixin",
+    "MinecraftClientMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
