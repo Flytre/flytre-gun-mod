@@ -4,17 +4,18 @@ import net.flytre.fguns.FlytreGuns;
 import net.flytre.fguns.Sounds;
 import net.flytre.fguns.entity.Bullet;
 import net.minecraft.client.item.TooltipContext;
-import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.EnderPearlItem;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.MathHelper;
@@ -22,10 +23,14 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
 public class GunItem extends Item {
 
+    public static final Set<GunItem> GUNS = new HashSet<>();
     private final double damage; //Base damage
     private final double armorPen; //Armor Penetration, eg 0.75 ignores 75% of armor
     private final double rps; //Rounds per second, eg 2 would fire a bullet every 10 ticks
@@ -47,6 +52,19 @@ public class GunItem extends Item {
         this.clipSize = clipSize;
         this.reloadTime = reloadTime;
         this.gunType = gunType;
+        GUNS.add(this);
+    }
+
+    public static GunItem randomGun() {
+        int size = GUNS.size();
+        int item = new Random().nextInt(size); // In real life, the Random object should be rather more shared than this
+        int i = 0;
+        for (GunItem obj : GUNS) {
+            if (i == item)
+                return obj;
+            i++;
+        }
+        return null;
     }
 
     public GunType getType() {
@@ -55,17 +73,48 @@ public class GunItem extends Item {
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+
+        if (!(entity instanceof PlayerEntity))
+            return;
+
+        PlayerEntity player = (PlayerEntity) entity;
+
         CompoundTag tag = stack.getOrCreateTag();
         int clip = tag.contains("clip") ? tag.getInt("clip") : getClipSize();
-        if (clip == 0) {
-            int reload = tag.contains("reload") ? tag.getInt("reload") : -1;
+        int reload = tag.contains("reload") ? tag.getInt("reload") : -1;
+        if (reload != -1 || clip == 0) {
+            int partialClip = tag.contains("partialClip") ? tag.getInt("partialClip") : 0;
+
+            if (reload >= 0) {
+                double ammoCalc = (double) getClipSize() / ((int) (getReloadTime() * 20));
+                ammoCalc *= (int) (getReloadTime() * 20) - reload;
+                while (partialClip < Math.floor(ammoCalc)) {
+                    if (hasAmmo(getAmmoItem(), player)) {
+                        removeAmmo(getAmmoItem(), player);
+                        partialClip++;
+                    } else {
+                        tag.putDouble("clip", partialClip);
+                        tag.remove("reload");
+                        tag.remove("partialClip");
+                        reload = -1;
+                        partialClip = 0;
+                        break;
+                    }
+                }
+                tag.putInt("partialClip", partialClip);
+            }
+
             if (reload == 0) {
-                tag.putDouble("clip", getClipSize());
+                tag.putDouble("clip", partialClip);
                 tag.remove("reload");
+                tag.remove("partialClip");
             } else if (reload != -1) {
                 tag.putInt("reload", reload - 1);
-            } else {
+
+            } else if (hasAmmo(getAmmoItem(), player)) {
                 tag.putInt("reload", (int) (getReloadTime() * 20));
+                tag.putInt("partialClip", clip);
+                tag.putInt("clip", 0);
             }
 
         }
@@ -94,7 +143,7 @@ public class GunItem extends Item {
                 playSound(world, user);
                 tag.putInt("cooldown", maxCd);
                 tag.putDouble("clip", clip - 1);
-            } else if(clip == 0 && cooldown == 0) {
+            } else if (clip == 0 && cooldown == 0) {
                 world.playSound(
                         null,
                         user.getBlockPos(),
@@ -113,7 +162,7 @@ public class GunItem extends Item {
     private void playSound(World world, PlayerEntity user) {
 
         SoundEvent event;
-        switch(getType()) {
+        switch (getType()) {
             case SNIPER:
                 event = Sounds.SNIPER_FIRE_EVENT;
                 break;
@@ -139,6 +188,46 @@ public class GunItem extends Item {
                 1f,
                 1f
         );
+    }
+
+
+    public Item getAmmoItem() {
+        Item ammo;
+        switch (getType()) {
+            case SNIPER:
+                ammo = FlytreGuns.SNIPER_AMMO;
+                break;
+            case SHOTGUN:
+                ammo = FlytreGuns.SHOTGUN_SHELL;
+                break;
+            default:
+                ammo = FlytreGuns.BASIC_AMMO;
+        }
+        return ammo;
+    }
+
+
+    //Has ammo
+    public static boolean hasAmmo(Item ammo, PlayerEntity playerEntity) {
+        if (!playerEntity.isCreative()) {
+            for (ItemStack item : playerEntity.inventory.main) {
+                if (!item.isEmpty() && item.getItem() == ammo) {
+                    return true;
+                }
+            }
+        }
+        return playerEntity.isCreative();
+    }
+
+    protected void removeAmmo(Item ammo, PlayerEntity playerEntity) {
+        if (!playerEntity.isCreative()) {
+            for (ItemStack item : playerEntity.inventory.main) {
+                if (item.getItem() == ammo) {
+                    item.decrement(1);
+                    break;
+                }
+            }
+        }
     }
 
 
@@ -190,7 +279,10 @@ public class GunItem extends Item {
     }
 
     protected Vec3d getRotationVectorSpray(PlayerEntity user) {
-        return getRotationVector((float) (user.pitch + (Math.random() * (spray + 1)) - 1 - spray / 2.0), (float) (user.yaw + (Math.random() * (spray + 1)) - 1 - spray / 2.0));
+        int tSpray = spray;
+        if (user.isSneaking())
+            tSpray = Math.max(0, Math.min((spray * 2) / 5, spray - 5));
+        return getRotationVector((float) (user.pitch + (Math.random() * (tSpray + 1)) - 1 - tSpray / 2.0), (float) (user.yaw + (Math.random() * (tSpray + 1)) - 1 - tSpray / 2.0));
     }
 
     protected Vec3d getRotationVector(float pitch, float yaw) {
@@ -203,6 +295,29 @@ public class GunItem extends Item {
         return new Vec3d(i * j, -k, h * j);
     }
 
+
+    public static void attemptEarlyReload(PlayerEntity player) {
+
+        //get the gun
+        ItemStack stack = player.getOffHandStack();
+        if(!(stack.getItem() instanceof GunItem))
+            stack = player.getMainHandStack();
+
+        if(!(stack.getItem() instanceof GunItem))
+            return;
+        GunItem gun = (GunItem) stack.getItem();
+
+        CompoundTag tag = stack.getOrCreateTag();
+        //reload!
+        if (hasAmmo(gun.getAmmoItem(), player)) {
+            tag.putInt("reload", (int) (gun.getReloadTime() * 20));
+            int clip = tag.contains("clip") ? tag.getInt("clip") : gun.getClipSize();
+            tag.putInt("partialClip", clip);
+            tag.putInt("clip", 0);
+        }
+
+    }
+
     @Override
     public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
 
@@ -211,27 +326,26 @@ public class GunItem extends Item {
 
         GunItem g = (GunItem) stack.getItem();
 
-        tooltip.add(Text.of(g.getType().equals(GunType.PISTOL) ? "§2Secondary" : "§2Primary"));
-        tooltip.add(Text.of(
-                g.getType() == GunType.ROCKET ?
-                        "§7Damage: §cVaries" :
-                        "§7Damage: §c" + String.format("%.1f",g.getDamage()) +
-                                (g.getType() == GunType.SHOTGUN ? " / pellet" : "")
-        ));
+        tooltip.add(g.gunType == GunType.ROCKET ?
+                new TranslatableText("text.fguns.tooltip.damage.varies") :
+                new TranslatableText(g.gunType == GunType.SHOTGUN ? "text.fguns.tooltip.damage.shotgun" : "text.fguns.tooltip.damage", String.format("%.1f", g.getDamage()))
+        );
 
         int fireSpeed = (20 / (int) (20 / g.getRps()));
-        tooltip.add(Text.of(fireSpeed == 0 ? "§7RPS: §c" + String.format("%.1f",g.getRps()) : "§7RPS: §c" + fireSpeed));
+        tooltip.add(new TranslatableText("text.fguns.tooltip.rps", fireSpeed == 0 ? String.format("%.1f", g.getRps()) : fireSpeed));
 
-        tooltip.add(Text.of("§7Range: §c" + g.getRange() + " blocks"));
+        tooltip.add(new TranslatableText("text.fguns.tooltip.range", g.getRange()));
 
         if (g.getArmorPen() > 0)
-            tooltip.add(Text.of("§7Armor Pierce: §c" + (int) (g.getArmorPen()*100) + "%"));
+            tooltip.add(new TranslatableText("text.fguns.tooltip.armor_pierce", (int) (g.getArmorPen() * 100)));
 
         if (g.getDropoff() > 0)
-            tooltip.add(Text.of("§7Dropoff: §c" + ((int) (100 * (g.getDropoff() * 100))) / 100 + " % per block"));
-        else if (g.getDropoff() < 0)
-            tooltip.add(Text.of("§7Damage Increase: §c" + ((int) (100 * (Math.abs(g.getDropoff()) * 100))) / 100 + " % per block"));
+            if (g.getDropoff() > 0)
+                tooltip.add(new TranslatableText("text.fguns.tooltip.dropoff", (int) (100 * (g.getDropoff() * 100)) / 100));
+            else if (g.getDropoff() < 0)
+                tooltip.add(new TranslatableText("text.fguns.tooltip.dropoff.increase", ((int) (100 * (Math.abs(g.getDropoff()) * 100))) / 100));
 
+        tooltip.add(new LiteralText("§7Ammo: §c").append(new TranslatableText(getAmmoItem().getTranslationKey())));
 
         super.appendTooltip(stack, world, tooltip, context);
     }

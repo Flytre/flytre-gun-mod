@@ -1,5 +1,6 @@
 package net.flytre.fguns.entity;
 
+import net.flytre.fguns.BulletDamageSource;
 import net.flytre.fguns.FlytreGuns;
 import net.flytre.fguns.guns.GunType;
 import net.minecraft.block.Blocks;
@@ -87,7 +88,7 @@ public class Bullet extends ThrownEntity {
         double dist = Math.sqrt(distSquared(initialPos.x, initialPos.z, getX(), getZ()));
         double modifiedDamage = damage * Math.pow(1 - dropoff, dist);
         entity.timeUntilRegen = 0;
-        entity.damage(DamageSource.thrownProjectile(this, this.getOwner()), (float) modifiedDamage);
+        entity.damage(new BulletDamageSource(this, this.getOwner()), (float) modifiedDamage);
 
         if(getProperties() == GunType.SLIME && entity instanceof LivingEntity) {
             ((LivingEntity) entity).addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS,20,2));

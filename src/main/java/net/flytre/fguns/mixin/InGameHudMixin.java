@@ -43,7 +43,9 @@ public class InGameHudMixin {
             return;
 
         Item item = mc.player.getMainHandStack().getItem();
-        if(item instanceof GunItem && ((GunItem) item).getType() == GunType.SNIPER && mc.player.isSneaking()) {
+        if(item instanceof GunItem && mc.player.isSneaking()) {
+            GunType type = ((GunItem) item).getType();
+            if(type != GunType.PISTOL && type != GunType.MINIGUN && type != GunType.SLIME)
             if (this.client.options.getPerspective().isFirstPerson()) {
                 this.renderScopeOverlay();
             }

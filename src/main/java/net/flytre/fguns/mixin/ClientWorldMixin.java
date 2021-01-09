@@ -24,8 +24,12 @@ public class ClientWorldMixin {
 
 
         Item item = mc.player.getMainHandStack().getItem();
-        if(item instanceof GunItem && ((GunItem) item).getType() == GunType.SNIPER && mc.player.isSneaking()) {
-          MixinHelper.shiftTime++;
+        if(item instanceof GunItem && mc.player.isSneaking()) {
+            GunType type = ((GunItem) item).getType();
+            if(type != GunType.PISTOL && type != GunType.MINIGUN && type != GunType.SLIME) {
+                MixinHelper.shiftTime++;
+                MixinHelper.gun = (GunItem) item;
+            }
         } else
             MixinHelper.shiftTime = 0;
     }
