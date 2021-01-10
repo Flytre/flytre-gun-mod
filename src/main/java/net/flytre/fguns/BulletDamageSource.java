@@ -20,8 +20,8 @@ public class BulletDamageSource extends EntityDamageSource {
 
 
     @Nullable
-    public Entity getSource() {
-        return this.source;
+    public Bullet getSource() {
+        return (Bullet) this.source;
     }
 
     @Nullable

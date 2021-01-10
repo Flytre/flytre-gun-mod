@@ -6,8 +6,8 @@ import net.minecraft.world.World;
 
 public class Shotgun extends GunItem {
 
-    public Shotgun() {
-        super(4, .40, 3, 0.06, 16, 12, 2, 2.2, GunType.SHOTGUN);
+    public Shotgun(double damage, double armorPen, double rps, double dropoff, int spray, int range, int clipSize, double reloadTime) {
+        super(damage, armorPen, rps, dropoff, spray, range, clipSize, reloadTime, GunType.SHOTGUN);
     }
 
     @Override

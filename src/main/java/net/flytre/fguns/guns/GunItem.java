@@ -1,5 +1,7 @@
 package net.flytre.fguns.guns;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.flytre.fguns.FlytreGuns;
 import net.flytre.fguns.Sounds;
 import net.flytre.fguns.entity.Bullet;
@@ -18,8 +20,10 @@ import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
@@ -40,6 +44,7 @@ public class GunItem extends Item {
     private final int clipSize;
     private final double reloadTime;
     private final GunType gunType;
+    private String name;
 
     public GunItem(double damage, double armorPen, double rps, double dropoff, int spray, int range, int clipSize, double reloadTime, GunType gunType) {
         super(new Item.Settings().maxCount(1).group(FlytreGuns.TAB));
@@ -52,7 +57,13 @@ public class GunItem extends Item {
         this.clipSize = clipSize;
         this.reloadTime = reloadTime;
         this.gunType = gunType;
+        this.name = null;
         GUNS.add(this);
+    }
+
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public static GunItem randomGun() {
@@ -176,6 +187,9 @@ public class GunItem extends Item {
             case SLIME:
                 event = Sounds.SLIME_FIRE_EVENT;
                 break;
+            case ROCKET:
+                event = Sounds.ROCKET_FIRE_EVENT;
+                break;
             default:
                 event = Sounds.PISTOL_FIRE_EVENT;
         }
@@ -199,6 +213,9 @@ public class GunItem extends Item {
                 break;
             case SHOTGUN:
                 ammo = FlytreGuns.SHOTGUN_SHELL;
+                break;
+            case ROCKET:
+                ammo = FlytreGuns.ROCKET_AMMO;
                 break;
             default:
                 ammo = FlytreGuns.BASIC_AMMO;
@@ -317,6 +334,19 @@ public class GunItem extends Item {
         }
 
     }
+
+
+    @Environment(EnvType.CLIENT)
+    public Text getName() {
+        return new TranslatableText(name == null ? this.getTranslationKey() : name);
+    }
+
+    protected String getOrCreateTranslationKey() {
+        if(name != null)
+            return name;
+        return super.getOrCreateTranslationKey();
+    }
+
 
     @Override
     public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {

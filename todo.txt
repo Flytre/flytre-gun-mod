@@ -1,3 +1,14 @@
 Enchantments: Infinity enchantment etc.
 Website: Extra TNT forge & Gun Mod
 reload bullet sound
+
+Changelog:
+Scopes!
+Shifting increases accuracy
+Custom HUD display
+Hit R to reload early
+Custom death messages
+Sounds
+Tooltips use translations
+Crafting recipes
+Mystery Gun; Random gun when crafted

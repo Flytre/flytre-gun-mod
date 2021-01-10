@@ -1,0 +1,13 @@
+{
+  "name" : "§cDeath",
+  "id" : "death",
+  "damage": 5,
+  "armor_pen": 0.9,
+  "rps": 20,
+  "dropoff": 0.03,
+  "spray": 30,
+  "range": 50,
+  "clip": 300,
+  "reload" : 8.6,
+  "type" : "RIFLE"
+}

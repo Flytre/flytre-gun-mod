@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "i",
+    "i",
+    "G"
+  ],
+  "key": {
+    "i": {
+      "item": "minecraft:iron_ingot"
+    },
+    "G": {
+      "item": "minecraft:tnt"
+    }
+  },
+  "result": {
+    "item": "fguns:rocket_ammo",
+    "count": 2
+  }
+}

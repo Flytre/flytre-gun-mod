@@ -38,17 +38,20 @@ public class FlytreGuns implements ModInitializer {
     public static final Sniper SEEKER = new Sniper(13, .75, 0.2, 0.0, 17, 100, 5, 12.0, GunType.SNIPER);
     public static final Sniper NIGHTMARE = new Sniper(22, .90, 0.11, 0.0, 17, 100, 1, 9.0, GunType.SNIPER);
 
-    public static final Shotgun SHOTGUN = new Shotgun();
+    public static final Shotgun SHOTGUN = new Shotgun(4, .40, 3, 0.06, 16, 12, 2, 2.2);
 
     public static final GunItem TRIFORCE = new GunItem(6, .40, 20, 0.01, 3, 35, 3, 1.25, GunType.RIFLE);
 
     public static final SlimeGun SLIMER = new SlimeGun(4, .20, 4, 0.01, 0, 40, 10, 2.0);
 
 
+    public static final RocketLauncher ROCKET_LAUNCHER = new RocketLauncher(1,100,0.33,0.00,0,40,2,2.5);
+
     //AMMO
     public static final Item BASIC_AMMO = new Item(new Item.Settings().group(FlytreGuns.TAB));
     public static final Item SHOTGUN_SHELL = new Item(new Item.Settings().group(FlytreGuns.TAB));
     public static final Item SNIPER_AMMO = new Item(new Item.Settings().group(FlytreGuns.TAB));
+    public static final Item ROCKET_AMMO = new Item(new Item.Settings().group(FlytreGuns.TAB));
 
     public static final Item MYSTERY_GUN = new MysteryGun();
 
@@ -75,10 +78,15 @@ public class FlytreGuns implements ModInitializer {
         Registry.register(Registry.ITEM, new Identifier("fguns", "basic_ammo"), BASIC_AMMO);
         Registry.register(Registry.ITEM, new Identifier("fguns", "shotgun_shell"), SHOTGUN_SHELL);
         Registry.register(Registry.ITEM, new Identifier("fguns", "sniper_ammo"), SNIPER_AMMO);
+        Registry.register(Registry.ITEM, new Identifier("fguns", "rocket_ammo"), ROCKET_AMMO);
 
         Registry.register(Registry.ITEM, new Identifier("fguns", "mystery_gun"), MYSTERY_GUN);
 
+        Registry.register(Registry.ITEM, new Identifier("fguns", "rocket_launcher"), ROCKET_LAUNCHER);
+
+
         Sounds.init();
+        ConfigHandler.handleConfig();
 
 
         ServerPlayNetworking.registerGlobalReceiver(FlytreGuns.RELOAD_PACKET_ID,(server, player, handler, buf, responseSender) -> {

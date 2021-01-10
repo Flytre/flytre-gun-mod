@@ -12,6 +12,8 @@ import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.BlazeEntity;
+import net.minecraft.entity.projectile.AbstractFireballEntity;
+import net.minecraft.entity.projectile.FireballEntity;
 import net.minecraft.entity.projectile.thrown.ThrownEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
@@ -20,7 +22,9 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
+import net.minecraft.world.explosion.Explosion;
 
 public class Bullet extends ThrownEntity {
 
@@ -144,6 +148,7 @@ public class Bullet extends ThrownEntity {
 
     @Override
     protected void onCollision(HitResult hitResult) {
+
         super.onCollision(hitResult);
 
 
@@ -158,6 +163,12 @@ public class Bullet extends ThrownEntity {
             }
 
         }
+
+        if(getProperties() == GunType.ROCKET) {
+            boolean bl = this.world.getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING);
+            this.world.createExplosion(getOwner(), this.getX(), this.getY(), this.getZ(), 3f, bl, bl ? Explosion.DestructionType.DESTROY : Explosion.DestructionType.NONE);
+        }
+
         if (!this.world.isClient) {
             this.world.sendEntityStatus(this, (byte) 3);
             this.remove();
@@ -166,7 +177,8 @@ public class Bullet extends ThrownEntity {
 
 
     protected float getGravity() {
-        return getProperties() == GunType.SNIPER ? 0.00F : 0.02F;
+        return getProperties() == GunType.SNIPER ? 0.00F :
+                (getProperties() == GunType.ROCKET ? 0.08F : 0.03F);
     }
 
 

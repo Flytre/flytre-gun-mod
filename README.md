@@ -15,6 +15,10 @@ You may notice the license is All Rights Reserved. Luckily, I have outlined your
 
 
 ## Devs
-TODO!
+How to create custom guns:
+1. go to your config folder, and create a new subfolder called fguns
+2. place JSON files inside (any name) for each gun you want to add
+    See /config/example for format.
+    See net.flytre.guns.GunType for GunType values, most are not currently supported
 
 ©2020 Flytre

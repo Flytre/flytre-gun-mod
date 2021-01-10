@@ -1,5 +1,6 @@
 package net.flytre.fguns.mixin;
 
+import net.flytre.fguns.BulletDamageSource;
 import net.flytre.fguns.entity.Bullet;
 import net.minecraft.entity.DamageUtil;
 import net.minecraft.entity.LivingEntity;
@@ -27,14 +28,13 @@ public abstract class LivingEntityMixin {
 
     @Inject(method = "applyArmorToDamage", at = @At("HEAD"), cancellable = true)
     public void armorPen(DamageSource source, float amount, CallbackInfoReturnable<Float> cir) {
-        if (!(source instanceof ProjectileDamageSource))
+        if (!(source instanceof BulletDamageSource))
             return;
-        ProjectileDamageSource src = (ProjectileDamageSource) source;
+        BulletDamageSource src = (BulletDamageSource) source;
+        Bullet bullet = src.getSource();
 
-        if (!(source.getSource() instanceof Bullet))
+        if(bullet == null)
             return;
-
-        Bullet bullet = (Bullet) source.getSource();
 
         damageArmor(source, amount);
         amount = DamageUtil.getDamageLeft(amount, (float) (getArmor() * (1 - bullet.getArmorPen())), (float) (this.getAttributeValue(EntityAttributes.GENERIC_ARMOR_TOUGHNESS) * (1 - bullet.getArmorPen())));
