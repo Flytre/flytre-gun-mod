@@ -1,14 +1,12 @@
 package net.flytre.fguns.mixin;
 
 import net.flytre.fguns.MixinHelper;
-import net.flytre.fguns.guns.GunItem;
 import net.flytre.fguns.guns.GunType;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.options.GameOptions;
 import net.minecraft.client.options.Perspective;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
-import net.minecraft.item.Item;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

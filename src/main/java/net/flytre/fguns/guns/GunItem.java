@@ -14,16 +14,12 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.LiteralText;
-import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
@@ -61,11 +57,6 @@ public class GunItem extends Item {
         GUNS.add(this);
     }
 
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public static GunItem randomGun() {
         int size = GUNS.size();
         int item = new Random().nextInt(size); // In real life, the Random object should be rather more shared than this
@@ -76,6 +67,40 @@ public class GunItem extends Item {
             i++;
         }
         return null;
+    }
+
+    //Has ammo
+    public static boolean hasAmmo(Item ammo, PlayerEntity playerEntity) {
+        if (!playerEntity.isCreative()) {
+            for (ItemStack item : playerEntity.inventory.main) {
+                if (!item.isEmpty() && item.getItem() == ammo) {
+                    return true;
+                }
+            }
+        }
+        return playerEntity.isCreative();
+    }
+
+    public static void attemptEarlyReload(PlayerEntity player) {
+
+        //get the gun
+        ItemStack stack = player.getOffHandStack();
+        if (!(stack.getItem() instanceof GunItem))
+            stack = player.getMainHandStack();
+
+        if (!(stack.getItem() instanceof GunItem))
+            return;
+        GunItem gun = (GunItem) stack.getItem();
+
+        CompoundTag tag = stack.getOrCreateTag();
+        //reload!
+        if (hasAmmo(gun.getAmmoItem(), player)) {
+            tag.putInt("reload", (int) (gun.getReloadTime() * 20));
+            int clip = tag.contains("clip") ? tag.getInt("clip") : gun.getClipSize();
+            tag.putInt("partialClip", clip);
+            tag.putInt("clip", 0);
+        }
+
     }
 
     public GunType getType() {
@@ -136,9 +161,9 @@ public class GunItem extends Item {
 
     }
 
-
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+
 
         if (world != null && !world.isClient) {
 
@@ -167,6 +192,7 @@ public class GunItem extends Item {
             }
             return TypedActionResult.pass(stack);
         }
+
         return TypedActionResult.pass(user.getStackInHand(hand));
     }
 
@@ -179,6 +205,7 @@ public class GunItem extends Item {
                 break;
             case RIFLE:
             case SMG:
+            case MINIGUN:
                 event = Sounds.RIFLE_FIRE_EVENT;
                 break;
             case SHOTGUN:
@@ -189,6 +216,9 @@ public class GunItem extends Item {
                 break;
             case ROCKET:
                 event = Sounds.ROCKET_FIRE_EVENT;
+                break;
+            case SHOCKER:
+                event = Sounds.SHOCKER_FIRE_EVENT;
                 break;
             default:
                 event = Sounds.PISTOL_FIRE_EVENT;
@@ -203,7 +233,6 @@ public class GunItem extends Item {
                 1f
         );
     }
-
 
     public Item getAmmoItem() {
         Item ammo;
@@ -221,19 +250,6 @@ public class GunItem extends Item {
                 ammo = FlytreGuns.BASIC_AMMO;
         }
         return ammo;
-    }
-
-
-    //Has ammo
-    public static boolean hasAmmo(Item ammo, PlayerEntity playerEntity) {
-        if (!playerEntity.isCreative()) {
-            for (ItemStack item : playerEntity.inventory.main) {
-                if (!item.isEmpty() && item.getItem() == ammo) {
-                    return true;
-                }
-            }
-        }
-        return playerEntity.isCreative();
     }
 
     protected void removeAmmo(Item ammo, PlayerEntity playerEntity) {
@@ -312,37 +328,17 @@ public class GunItem extends Item {
         return new Vec3d(i * j, -k, h * j);
     }
 
-
-    public static void attemptEarlyReload(PlayerEntity player) {
-
-        //get the gun
-        ItemStack stack = player.getOffHandStack();
-        if(!(stack.getItem() instanceof GunItem))
-            stack = player.getMainHandStack();
-
-        if(!(stack.getItem() instanceof GunItem))
-            return;
-        GunItem gun = (GunItem) stack.getItem();
-
-        CompoundTag tag = stack.getOrCreateTag();
-        //reload!
-        if (hasAmmo(gun.getAmmoItem(), player)) {
-            tag.putInt("reload", (int) (gun.getReloadTime() * 20));
-            int clip = tag.contains("clip") ? tag.getInt("clip") : gun.getClipSize();
-            tag.putInt("partialClip", clip);
-            tag.putInt("clip", 0);
-        }
-
-    }
-
-
     @Environment(EnvType.CLIENT)
     public Text getName() {
         return new TranslatableText(name == null ? this.getTranslationKey() : name);
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     protected String getOrCreateTranslationKey() {
-        if(name != null)
+        if (name != null)
             return name;
         return super.getOrCreateTranslationKey();
     }

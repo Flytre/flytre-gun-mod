@@ -3,19 +3,17 @@ package net.flytre.fguns.entity;
 import net.flytre.fguns.BulletDamageSource;
 import net.flytre.fguns.FlytreGuns;
 import net.flytre.fguns.guns.GunType;
+import net.flytre.fguns.guns.Shocker;
 import net.minecraft.block.Blocks;
-import net.minecraft.entity.*;
-import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.mob.BlazeEntity;
-import net.minecraft.entity.projectile.AbstractFireballEntity;
-import net.minecraft.entity.projectile.FireballEntity;
 import net.minecraft.entity.projectile.thrown.ThrownEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.particle.BlockStateParticleEffect;
 import net.minecraft.particle.ParticleTypes;
@@ -91,11 +89,16 @@ public class Bullet extends ThrownEntity {
 
         double dist = Math.sqrt(distSquared(initialPos.x, initialPos.z, getX(), getZ()));
         double modifiedDamage = damage * Math.pow(1 - dropoff, dist);
+
+        if (getProperties() == GunType.SHOCKER)
+            Shocker.chain(this, entityHitResult, (float) modifiedDamage);
+
+
         entity.timeUntilRegen = 0;
         entity.damage(new BulletDamageSource(this, this.getOwner()), (float) modifiedDamage);
 
-        if(getProperties() == GunType.SLIME && entity instanceof LivingEntity) {
-            ((LivingEntity) entity).addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS,20,2));
+        if (getProperties() == GunType.SLIME && entity instanceof LivingEntity) {
+            ((LivingEntity) entity).addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 20, 2));
         }
     }
 

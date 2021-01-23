@@ -12,7 +12,6 @@ import net.minecraft.entity.SpawnGroup;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
@@ -45,7 +44,12 @@ public class FlytreGuns implements ModInitializer {
     public static final SlimeGun SLIMER = new SlimeGun(4, .20, 4, 0.01, 0, 40, 10, 2.0);
 
 
-    public static final RocketLauncher ROCKET_LAUNCHER = new RocketLauncher(1,100,0.33,0.00,0,40,2,2.5);
+    public static final RocketLauncher ROCKET_LAUNCHER = new RocketLauncher(1, 100, 0.33, 0.00, 0, 40, 2, 2.5);
+
+    public static final Shocker VOLT = new Shocker(10, 0.4, 1.0, 0, 3, 30, 3, 1.25);
+
+    public static final Minigun MINIGUN = new Minigun(5, 0.40, 20.0, 0.04, 20, 30, 80, 6.5);
+
 
     //AMMO
     public static final Item BASIC_AMMO = new Item(new Item.Settings().group(FlytreGuns.TAB));
@@ -84,12 +88,16 @@ public class FlytreGuns implements ModInitializer {
 
         Registry.register(Registry.ITEM, new Identifier("fguns", "rocket_launcher"), ROCKET_LAUNCHER);
 
+        Registry.register(Registry.ITEM, new Identifier("fguns", "volt"), VOLT);
+
+        Registry.register(Registry.ITEM, new Identifier("fguns", "minigun"), MINIGUN);
+
 
         Sounds.init();
         ConfigHandler.handleConfig();
 
 
-        ServerPlayNetworking.registerGlobalReceiver(FlytreGuns.RELOAD_PACKET_ID,(server, player, handler, buf, responseSender) -> {
+        ServerPlayNetworking.registerGlobalReceiver(FlytreGuns.RELOAD_PACKET_ID, (server, player, handler, buf, responseSender) -> {
             server.execute(() -> GunItem.attemptEarlyReload(player));
         });
     }

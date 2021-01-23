@@ -1,11 +1,11 @@
 {
 	"credit": "Made with Blockbench",
 	"textures": {
-		"1": "block/gray_concrete",
-		"3": "block/pure_yellow",
-		"4": "block/black_concrete",
-		"particle": "block/white_concrete"
-	},
+      "1": "block/gray_concrete",
+      "3": "fguns:block/pure_yellow",
+      "4": "block/black_concrete",
+      "particle": "block/white_concrete"
+    },
 	"elements": [
 		{
 			"from": [6.99565, 6.13696, 4.28478],

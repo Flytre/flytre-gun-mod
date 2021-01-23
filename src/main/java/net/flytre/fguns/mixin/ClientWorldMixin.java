@@ -22,7 +22,6 @@ public class ClientWorldMixin {
         if(mc.player == null)
             return;
 
-
         Item item = mc.player.getMainHandStack().getItem();
         if(item instanceof GunItem && mc.player.isSneaking()) {
             GunType type = ((GunItem) item).getType();
