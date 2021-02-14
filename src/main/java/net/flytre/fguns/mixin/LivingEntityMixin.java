@@ -7,7 +7,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.damage.ProjectileDamageSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -27,13 +26,13 @@ public abstract class LivingEntityMixin {
     public abstract double getAttributeValue(EntityAttribute attribute);
 
     @Inject(method = "applyArmorToDamage", at = @At("HEAD"), cancellable = true)
-    public void armorPen(DamageSource source, float amount, CallbackInfoReturnable<Float> cir) {
+    public void fguns$armorPen(DamageSource source, float amount, CallbackInfoReturnable<Float> cir) {
         if (!(source instanceof BulletDamageSource))
             return;
         BulletDamageSource src = (BulletDamageSource) source;
         Bullet bullet = src.getSource();
 
-        if(bullet == null)
+        if (bullet == null)
             return;
 
         damageArmor(source, amount);

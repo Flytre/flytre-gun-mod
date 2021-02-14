@@ -17,15 +17,15 @@ import java.util.function.BooleanSupplier;
 public class ClientWorldMixin {
 
     @Inject(method = "tick", at = @At("HEAD"))
-    public void tick(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
+    public void fguns$tick(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
         MinecraftClient mc = MinecraftClient.getInstance();
-        if(mc.player == null)
+        if (mc.player == null)
             return;
 
         Item item = mc.player.getMainHandStack().getItem();
-        if(item instanceof GunItem && mc.player.isSneaking()) {
+        if (item instanceof GunItem && mc.player.isSneaking()) {
             GunType type = ((GunItem) item).getType();
-            if(type != GunType.PISTOL && type != GunType.MINIGUN && type != GunType.SLIME) {
+            if (type != GunType.PISTOL && type != GunType.MINIGUN && type != GunType.SLIME) {
                 MixinHelper.shiftTime++;
                 MixinHelper.gun = (GunItem) item;
             }

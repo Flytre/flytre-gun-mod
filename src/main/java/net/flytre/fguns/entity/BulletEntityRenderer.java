@@ -1,14 +1,12 @@
 package net.flytre.fguns.entity;
 
 import net.flytre.fguns.guns.GunType;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.entity.*;
+import net.minecraft.client.render.entity.EntityRenderDispatcher;
+import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.util.Identifier;
@@ -22,7 +20,6 @@ public class BulletEntityRenderer extends EntityRenderer<Bullet> {
         super(entityRenderDispatcher);
         this.shadowRadius = 0;
         this.shadowOpacity = 0;
-        BlockState block = Blocks.STONE_BUTTON.getDefaultState();
         this.model = model;
     }
 

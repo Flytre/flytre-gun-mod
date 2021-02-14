@@ -4,10 +4,10 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import net.flytre.fguns.entity.Bullet;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 
@@ -31,7 +31,7 @@ public class Minigun extends GunItem {
     }
 
     @Override
-    public void bulletSetup(World world, PlayerEntity user, Hand hand, Bullet bullet) {
+    public void bulletSetup(World world, LivingEntity user, Hand hand, Bullet bullet) {
         bullet.setPos(user.getX(), user.getEyeY() - 0.8, user.getZ());
         super.bulletSetup(world, user, hand, bullet);
     }

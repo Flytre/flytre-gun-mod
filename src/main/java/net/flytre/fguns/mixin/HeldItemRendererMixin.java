@@ -18,12 +18,13 @@ import net.minecraft.util.math.MathHelper;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Environment(EnvType.CLIENT)
-@Mixin(HeldItemRenderer.class)
+@Mixin(value = HeldItemRenderer.class, priority = 100)
 public abstract class HeldItemRendererMixin {
 
 
@@ -49,12 +50,11 @@ public abstract class HeldItemRendererMixin {
     @Shadow
     protected abstract void renderArm(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, Arm arm);
 
-    @Shadow
-    protected abstract void renderFirstPersonItem(AbstractClientPlayerEntity player, float tickDelta, float pitch, Hand hand, float swingProgress, ItemStack item, float equipProgress, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light);
 
     @Inject(method = "updateHeldItems", at = @At("TAIL"))
-    public void cancelAnimation(CallbackInfo ci) {
+    public void fguns$cancelAnimation(CallbackInfo ci) {
         ClientPlayerEntity clientPlayerEntity = this.client.player;
+        assert clientPlayerEntity != null;
         ItemStack itemStack = clientPlayerEntity.getMainHandStack();
         ItemStack itemStack2 = clientPlayerEntity.getOffHandStack();
 
@@ -69,19 +69,19 @@ public abstract class HeldItemRendererMixin {
     }
 
     @Inject(method = "renderFirstPersonItem", cancellable = true, at = @At("HEAD"))
-    public void gunRenders(AbstractClientPlayerEntity player, float tickDelta, float pitch, Hand hand, float swingProgress, ItemStack item, float equipProgress, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci) {
+    public void fguns$gunRenders(AbstractClientPlayerEntity player, float tickDelta, float pitch, Hand hand, float swingProgress, ItemStack item, float equipProgress, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci) {
         boolean bl = hand == Hand.MAIN_HAND;
-        Arm arm = bl ? player.getMainArm() : player.getMainArm().getOpposite();
         matrices.push();
         if (item.getItem() == FlytreGuns.MINIGUN) {
             if (bl && this.offHand.isEmpty()) {
-                this.renderGun(matrices, vertexConsumers, light, pitch, equipProgress, swingProgress, tickDelta);
+                this.renderGun(matrices, vertexConsumers, light, equipProgress, swingProgress);
             }
         }
     }
 
 
-    private void renderGun(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, float pitch, float equipProgress, float swingProgress, float tickDelta) {
+    @Unique
+    private void renderGun(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, float equipProgress, float swingProgress) {
         float f = MathHelper.sqrt(swingProgress);
         float g = -0.2F * MathHelper.sin(swingProgress * 3.1415927F);
         float h = -0.4F * MathHelper.sin(f * 3.1415927F);
@@ -89,6 +89,7 @@ public abstract class HeldItemRendererMixin {
         float i = getMapAngle(45);
         matrices.translate(0.0D, 0.04F + equipProgress * -1.2F + i * -0.5F, -0.7200000286102295D);
         matrices.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(i * -85.0F));
+        assert this.client.player != null;
         if (!this.client.player.isInvisible()) {
             matrices.push();
             matrices.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(90.0F));

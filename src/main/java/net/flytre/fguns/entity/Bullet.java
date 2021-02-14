@@ -2,9 +2,12 @@ package net.flytre.fguns.entity;
 
 import net.flytre.fguns.BulletDamageSource;
 import net.flytre.fguns.FlytreGuns;
+import net.flytre.fguns.ParticleHelper;
 import net.flytre.fguns.guns.GunType;
 import net.flytre.fguns.guns.Shocker;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -32,17 +35,15 @@ public class Bullet extends ThrownEntity {
         GUN_TYPE = DataTracker.registerData(Bullet.class, TrackedDataHandlerRegistry.STRING);
     }
 
+    double lastX;
+    double lastY;
+    double lastZ;
     private double damage;
     private double armorPen;
     private double dropoff;
     private int range;
     private Vec3d initialPos;
     private double initialSpeed = -1;
-
-
-    double lastX;
-    double lastY;
-    double lastZ;
 
 
     public Bullet(EntityType<? extends Bullet> entityType, World world) {
@@ -92,7 +93,17 @@ public class Bullet extends ThrownEntity {
 
         if (getProperties() == GunType.SHOCKER)
             Shocker.chain(this, entityHitResult, (float) modifiedDamage);
+        else if (world.isClient) {
+            WorldRenderer worldRenderer = MinecraftClient.getInstance().worldRenderer;
+            Vec3d pos = entity.getPos();
+            double x = pos.x;
+            double y = pos.y + entity.getHeight() / 1.5;
+            double z = pos.z;
+            for (int i = 0; i < 15; i++) {
+                worldRenderer.addParticle(ParticleHelper.getParticle(entity), false, x, y, z, 0, 0, 0);
+            }
 
+        }
 
         entity.timeUntilRegen = 0;
         entity.damage(new BulletDamageSource(this, this.getOwner()), (float) modifiedDamage);
@@ -141,11 +152,11 @@ public class Bullet extends ThrownEntity {
         double dZ = getZ() - lastZ;
         double distance = Math.sqrt(dX * dX + dY * dY + dZ * dZ);
 
-        for(double i = 0; i <= 1; i+= 1/distance) {
+        for (double i = 0; i <= 1; i += 1 / distance) {
             double mX = prevX + (dX * i);
             double mY = prevY + (dY * i);
             double mZ = prevZ + (dZ * i);
-            world.addParticle(ParticleTypes.SMOKE,mX,mY,mZ,0,0,0);
+            world.addParticle(ParticleTypes.SMOKE, mX, mY, mZ, 0, 0, 0);
         }
     }
 
@@ -155,7 +166,7 @@ public class Bullet extends ThrownEntity {
         super.onCollision(hitResult);
 
 
-        if(getProperties() == GunType.SLIME) {
+        if (getProperties() == GunType.SLIME) {
             //slime particles
             BlockStateParticleEffect particle = new BlockStateParticleEffect(ParticleTypes.BLOCK, Blocks.SLIME_BLOCK.getDefaultState());
             BlockStateParticleEffect particle2 = new BlockStateParticleEffect(ParticleTypes.BLOCK, Blocks.ICE.getDefaultState());
@@ -167,7 +178,7 @@ public class Bullet extends ThrownEntity {
 
         }
 
-        if(getProperties() == GunType.ROCKET) {
+        if (getProperties() == GunType.ROCKET) {
             boolean bl = this.world.getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING);
             this.world.createExplosion(getOwner(), this.getX(), this.getY(), this.getZ(), 3f, bl, bl ? Explosion.DestructionType.DESTROY : Explosion.DestructionType.NONE);
         }

@@ -1,0 +1,22 @@
+{
+  "type": "fguns:workbench",
+  "ingredients": [
+    {
+      "item": "minecraft:iron_ingot",
+      "count": 256
+    },
+    {
+      "item": "minecraft:redstone",
+      "count": 128
+    },
+    {
+      "item": "minecraft:black_dye",
+      "count": 32
+    },
+    {
+      "item": "minecraft:yellow_dye",
+      "count": 32
+    }
+  ],
+  "result": "fguns:volt"
+}

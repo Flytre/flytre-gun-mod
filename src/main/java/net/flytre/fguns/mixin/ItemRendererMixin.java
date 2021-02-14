@@ -14,19 +14,20 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.math.MathHelper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Environment(EnvType.CLIENT)
-@Mixin(ItemRenderer.class)
+@Mixin(value = ItemRenderer.class, priority = 500)
 public abstract class ItemRendererMixin {
 
     @Shadow
     protected abstract void renderGuiQuad(BufferBuilder buffer, int x, int y, int width, int height, int red, int green, int blue, int alpha);
 
     @Inject(method = "renderGuiItemOverlay(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/item/ItemStack;IILjava/lang/String;)V", at = @At("RETURN"))
-    public void gunDamage(TextRenderer renderer, ItemStack stack, int x, int y, String countLabel, CallbackInfo ci) {
+    public void fguns$gunDamage(TextRenderer renderer, ItemStack stack, int x, int y, String countLabel, CallbackInfo ci) {
 
         Item item = stack.getItem();
 
@@ -60,6 +61,7 @@ public abstract class ItemRendererMixin {
     }
 
 
+    @Unique
     private void renderCooldown(double k, int x, int y) {
         RenderSystem.disableDepthTest();
         RenderSystem.disableTexture();
@@ -72,6 +74,8 @@ public abstract class ItemRendererMixin {
         RenderSystem.enableDepthTest();
     }
 
+    @Unique
+    @SuppressWarnings("deprecation")
     private void renderBar(float curr, float max, int x, int y) {
         RenderSystem.disableDepthTest();
         RenderSystem.disableTexture();

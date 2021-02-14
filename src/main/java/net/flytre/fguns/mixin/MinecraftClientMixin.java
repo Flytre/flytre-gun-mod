@@ -23,15 +23,15 @@ public class MinecraftClientMixin {
     @Shadow private int itemUseCooldown;
 
     @Inject(method = "doItemUse", at = @At("RETURN"))
-    public void gunFireRate(CallbackInfo ci) {
+    public void fguns$gunFireRate(CallbackInfo ci) {
 
-        if(this.player == null)
+        if (this.player == null)
             return;
 
         for (Hand hand : Hand.values()) {
             ItemStack itemStack = this.player.getStackInHand(hand);
             if (!itemStack.isEmpty()) {
-                if(itemStack.getItem() instanceof GunItem)
+                if (itemStack.getItem() instanceof GunItem)
                     itemUseCooldown = 0;
                 return;
             }

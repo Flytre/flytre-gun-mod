@@ -23,10 +23,11 @@ public class GameRendererMixin {
                     opcode = Opcodes.GETFIELD,
                     ordinal = 0),
             method = {"getFov(Lnet/minecraft/client/render/Camera;FZ)D"})
-    private double getFov(GameOptions options, Camera camera, float tickDelta, boolean changingFov) {
+    private double fguns$getFov(GameOptions options, Camera camera, float tickDelta, boolean changingFov) {
         MinecraftClient mc = MinecraftClient.getInstance();
-        if (mc.player == null || MixinHelper.shiftTime == 0 || options.getPerspective() != Perspective.FIRST_PERSON || MixinHelper.gun == null)
+        if (mc.player == null || MixinHelper.shiftTime == 0 || options.getPerspective() != Perspective.FIRST_PERSON || MixinHelper.gun == null || mc.player.isSpectator())
             return options.fov;
+
 
         //map zoom
         double d = MixinHelper.shiftTime;
@@ -35,12 +36,12 @@ public class GameRendererMixin {
 
         double maxZoom = 5;
 
-        if(type == GunType.SNIPER)
+        if (type == GunType.SNIPER)
             maxZoom = 16;
 
         d = d > 0 ? d + tickDelta : d;
 
-        double zoomFactor = d >= 20 ? maxZoom : 1 + (d - 1) * (maxZoom - 1)/19;
+        double zoomFactor = d >= 20 ? maxZoom : 1 + (d - 1) * (maxZoom - 1) / 19;
         return options.fov * (1 / zoomFactor);
     }
 

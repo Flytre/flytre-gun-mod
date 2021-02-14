@@ -5,6 +5,7 @@ import com.google.common.collect.Multimap;
 import net.flytre.fguns.entity.Bullet;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
@@ -13,7 +14,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Hand;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,24 +34,14 @@ public class Sniper extends GunItem {
     }
 
 
-    private int getEffectiveSpray(PlayerEntity user) {
-        return user.isSneaking() ? 0 : getSpray();
-
-    }
-
-    protected Vec3d getRotationVectorSpray(PlayerEntity user) {
-
-        int spray = getEffectiveSpray(user);
-
-        if (spray == 0)
-            return getRotationVector(user.pitch, user.yaw);
-        else
-            return getRotationVector((float) (user.pitch + (Math.random() * (spray + 1)) - 1 - spray / 2.0), (float) (user.yaw + (Math.random() * (spray + 1)) - 1 - spray / 2.0));
+    @Override
+    public int getEffectiveSpray(LivingEntity user) {
+        return !(user instanceof PlayerEntity) ? 3 : user.isSneaking() ? 0 : getSpray();
     }
 
 
     @Override
-    public void bulletSetup(World world, PlayerEntity user, Hand hand, Bullet bullet) {
+    public void bulletSetup(World world, LivingEntity user, Hand hand, Bullet bullet) {
         bullet.setProperties(GunType.SNIPER);
         bullet.setVelocity(bullet.getVelocity().multiply(3));
         super.bulletSetup(world, user, hand, bullet);

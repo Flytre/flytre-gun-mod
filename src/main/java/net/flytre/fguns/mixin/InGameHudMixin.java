@@ -5,7 +5,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.flytre.fguns.guns.GunItem;
 import net.flytre.fguns.guns.GunType;
-import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.render.BufferBuilder;
@@ -17,6 +16,7 @@ import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -28,31 +28,37 @@ public class InGameHudMixin {
     private static final Identifier SCOPE = new Identifier("fguns:textures/misc/scope.png");
 
 
-    @Shadow @Final private MinecraftClient client;
+    @Shadow
+    @Final
+    private MinecraftClient client;
 
-    @Shadow private int scaledHeight;
+    @Shadow
+    private int scaledHeight;
 
-    @Shadow private int scaledWidth;
+    @Shadow
+    private int scaledWidth;
 
 
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;lerp(FFF)F",ordinal = 0))
-    public void scopeRender(MatrixStack matrices, float tickDelta, CallbackInfo ci) {
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;lerp(FFF)F", ordinal = 0))
+    public void fguns$scopeRender(MatrixStack matrices, float tickDelta, CallbackInfo ci) {
 
         MinecraftClient mc = MinecraftClient.getInstance();
-        if(mc.player == null)
+        if (mc.player == null || mc.player.isSpectator())
             return;
 
         Item item = mc.player.getMainHandStack().getItem();
-        if(item instanceof GunItem && mc.player.isSneaking()) {
+        if (item instanceof GunItem && mc.player.isSneaking()) {
             GunType type = ((GunItem) item).getType();
-            if(type != GunType.PISTOL && type != GunType.MINIGUN && type != GunType.SLIME)
-            if (this.client.options.getPerspective().isFirstPerson()) {
-                this.renderScopeOverlay();
-            }
+            if (type != GunType.PISTOL && type != GunType.MINIGUN && type != GunType.SLIME)
+                if (this.client.options.getPerspective().isFirstPerson()) {
+                    this.renderScopeOverlay();
+                }
         }
 
     }
 
+    @Unique
+    @SuppressWarnings("deprecation")
     private void renderScopeOverlay() {
         RenderSystem.disableDepthTest();
         RenderSystem.depthMask(false);

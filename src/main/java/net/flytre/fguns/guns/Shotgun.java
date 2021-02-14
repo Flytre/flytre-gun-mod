@@ -1,6 +1,6 @@
 package net.flytre.fguns.guns;
 
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 
@@ -11,9 +11,9 @@ public class Shotgun extends GunItem {
     }
 
     @Override
-    protected void fireBullet(World world, PlayerEntity user, Hand hand) {
+    public void fireBullet(World world, LivingEntity user, Hand hand, LivingEntity target, boolean semi) {
 
-        for(int i = 0; i < 5; i++)
-            super.fireBullet(world, user, hand);
+        for (int i = 0; i < 5; i++)
+            super.fireBullet(world, user, hand, target, false);
     }
 }

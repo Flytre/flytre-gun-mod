@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "fguns:block/workbench_front",
+    "north": "fguns:block/workbench_front",
+    "south": "fguns:block/workbench_side",
+    "east": "fguns:block/workbench_side",
+    "west": "fguns:block/workbench_front",
+    "up": "fguns:block/workbench_top",
+    "down": "fguns:block/workbench_bottom"
+  }
+}

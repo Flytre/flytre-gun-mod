@@ -1,7 +1,7 @@
 package net.flytre.fguns.guns;
 
 import net.flytre.fguns.entity.Bullet;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 
@@ -11,7 +11,7 @@ public class SlimeGun extends GunItem {
     }
 
     @Override
-    public void bulletSetup(World world, PlayerEntity user, Hand hand, Bullet bullet) {
+    public void bulletSetup(World world, LivingEntity user, Hand hand, Bullet bullet) {
         bullet.setProperties(GunType.SLIME);
         super.bulletSetup(world, user, hand, bullet);
     }

@@ -4,13 +4,16 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.flytre.fguns.FlytreGuns;
 import net.flytre.fguns.Sounds;
+import net.flytre.fguns.config.Config;
 import net.flytre.fguns.entity.Bullet;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.LiteralText;
@@ -23,14 +26,11 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 public class GunItem extends Item {
 
-    public static final Set<GunItem> GUNS = new HashSet<>();
+    public static final List<GunItem> GUNS = new ArrayList<>();
     private final double damage; //Base damage
     private final double armorPen; //Armor Penetration, eg 0.75 ignores 75% of armor
     private final double rps; //Rounds per second, eg 2 would fire a bullet every 10 ticks
@@ -60,13 +60,7 @@ public class GunItem extends Item {
     public static GunItem randomGun() {
         int size = GUNS.size();
         int item = new Random().nextInt(size); // In real life, the Random object should be rather more shared than this
-        int i = 0;
-        for (GunItem obj : GUNS) {
-            if (i == item)
-                return obj;
-            i++;
-        }
-        return null;
+        return GUNS.get(item);
     }
 
     //Has ammo
@@ -92,15 +86,63 @@ public class GunItem extends Item {
             return;
         GunItem gun = (GunItem) stack.getItem();
 
-        CompoundTag tag = stack.getOrCreateTag();
+
+        GunNBTSerializer serializer = new GunNBTSerializer(stack.getOrCreateTag(), gun);
         //reload!
-        if (hasAmmo(gun.getAmmoItem(), player)) {
-            tag.putInt("reload", (int) (gun.getReloadTime() * 20));
-            int clip = tag.contains("clip") ? tag.getInt("clip") : gun.getClipSize();
-            tag.putInt("partialClip", clip);
-            tag.putInt("clip", 0);
+        if (hasAmmo(gun.getAmmoItem(), player) && serializer.clip != gun.getClipSize()) {
+            serializer.reload = (int) (gun.getReloadTime() * 20);
+            serializer.partialClip = serializer.clip;
+            serializer.clip = 0;
+            serializer.toTag(stack.getOrCreateTag());
         }
 
+    }
+
+    public static void switchFiringPattern(ServerPlayerEntity player) {
+        //get the gun
+        ItemStack stack = player.getOffHandStack();
+        if (!(stack.getItem() instanceof GunItem))
+            stack = player.getMainHandStack();
+
+        if (!(stack.getItem() instanceof GunItem))
+            return;
+        GunItem gun = (GunItem) stack.getItem();
+
+        GunNBTSerializer serializer = new GunNBTSerializer(stack.getOrCreateTag(), gun);
+        serializer.mode = gun.getNextMode(serializer.mode);
+        serializer.toTag(stack.getOrCreateTag());
+    }
+
+    public static GunItem getEquippedGun() {
+        List<GunItem> tier0 = Arrays.asList(FlytreGuns.LASER_SPEED, FlytreGuns.LETHAL_MARK);
+        List<GunItem> tier1 = Arrays.asList(FlytreGuns.BEAMER, FlytreGuns.SLIMER);
+        List<GunItem> tier2 = Collections.singletonList(FlytreGuns.SEEKER);
+        List<GunItem> tier3 = Arrays.asList(FlytreGuns.NIGHTMARE, FlytreGuns.TRIFORCE);
+        List<GunItem> tier4 = Arrays.asList(FlytreGuns.SHOTGUN, FlytreGuns.BLASTER, FlytreGuns.RAPIDSTRIKE);
+        List<GunItem> tier5 = Arrays.asList(FlytreGuns.HUNTER, FlytreGuns.ROCKET_LAUNCHER, FlytreGuns.VOLT, FlytreGuns.MINIGUN);
+        double r = Math.random();
+        if (r > FlytreGuns.CONFIG_HANDLER.getConfig().getMobGunSpawnChance())
+            return null;
+        r = Math.random();
+        if (r < 0.56)
+            return randomElement(tier0);
+        if (r < 0.70)
+            return randomElement(tier1);
+        if (r < 0.82)
+            return randomElement(tier2);
+        if (r < 0.89)
+            return randomElement(tier3);
+        if (r < 0.95)
+            return randomElement(tier4);
+        return randomElement(tier5);
+    }
+
+    private static <T> T randomElement(List<T> list) {
+        return list.get((int) (Math.random() * list.size()));
+    }
+
+    public int getNextMode(int current) {
+        return current + 1 > 2 ? 0 : 2;
     }
 
     public GunType getType() {
@@ -115,88 +157,99 @@ public class GunItem extends Item {
 
         PlayerEntity player = (PlayerEntity) entity;
 
-        CompoundTag tag = stack.getOrCreateTag();
-        int clip = tag.contains("clip") ? tag.getInt("clip") : getClipSize();
-        int reload = tag.contains("reload") ? tag.getInt("reload") : -1;
-        if (reload != -1 || clip == 0) {
-            int partialClip = tag.contains("partialClip") ? tag.getInt("partialClip") : 0;
+        GunNBTSerializer serializer = new GunNBTSerializer(stack.getOrCreateTag(), this);
+        if (serializer.reload != -1 || serializer.clip == 0) { //If you should reload
 
-            if (reload >= 0) {
+            if (serializer.reload >= 0) {
                 double ammoCalc = (double) getClipSize() / ((int) (getReloadTime() * 20));
-                ammoCalc *= (int) (getReloadTime() * 20) - reload;
-                while (partialClip < Math.floor(ammoCalc)) {
+                ammoCalc *= (int) (getReloadTime() * 20) - serializer.reload;
+                while (serializer.partialClip < Math.floor(ammoCalc)) {
                     if (hasAmmo(getAmmoItem(), player)) {
                         removeAmmo(getAmmoItem(), player);
-                        partialClip++;
+                        serializer.partialClip++;
                     } else {
-                        tag.putDouble("clip", partialClip);
-                        tag.remove("reload");
-                        tag.remove("partialClip");
-                        reload = -1;
-                        partialClip = 0;
+                        serializer.clip = serializer.partialClip;
+                        serializer.reload = -1;
+                        serializer.partialClip = 0;
                         break;
                     }
                 }
-                tag.putInt("partialClip", partialClip);
             }
 
-            if (reload == 0) {
-                tag.putDouble("clip", partialClip);
-                tag.remove("reload");
-                tag.remove("partialClip");
-            } else if (reload != -1) {
-                tag.putInt("reload", reload - 1);
-
-            } else if (hasAmmo(getAmmoItem(), player)) {
-                tag.putInt("reload", (int) (getReloadTime() * 20));
-                tag.putInt("partialClip", clip);
-                tag.putInt("clip", 0);
+            if (serializer.reload == 0) {
+                serializer.clip = serializer.partialClip;
+                serializer.reload = -1;
+                serializer.partialClip = 0;
+            } else if (serializer.reload != -1) {
+                serializer.reload--;
+            } else if (hasAmmo(getAmmoItem(), player) && serializer.clip < getClipSize()) {
+                serializer.reload = (int) (getReloadTime() * 20);
+                serializer.partialClip = serializer.clip;
+                serializer.clip = 0;
             }
 
         }
-        int cooldown = tag.contains("cooldown") ? tag.getInt("cooldown") : 0;
 
-        if (cooldown > 0)
-            tag.putDouble("cooldown", cooldown - 1);
+        if (serializer.cooldown > 0)
+            serializer.cooldown--;
+
+        serializer.toTag(stack.getOrCreateTag());
 
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+    public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
+        if (remainingUseTicks == 100)
+            action(world, user, user.getMainHandStack() == stack ? Hand.MAIN_HAND : Hand.OFF_HAND, null, true);
+    }
 
+    @Override
+    public int getMaxUseTime(ItemStack stack) {
+        return 100;
+    }
+
+    public TypedActionResult<ItemStack> action(World world, LivingEntity hitman, Hand hand, LivingEntity target, boolean semi) {
+
+        ItemStack stack = hitman.getStackInHand(hand);
+        GunNBTSerializer serializer = new GunNBTSerializer(stack.getOrCreateTag(), this);
+        int maxCd = (int) (20 / rps - 1);
 
         if (world != null && !world.isClient) {
-
-            ItemStack stack = user.getStackInHand(hand);
-            CompoundTag tag = stack.getOrCreateTag();
-            int clip = tag.contains("clip") ? tag.getInt("clip") : getClipSize();
-            int reload = tag.contains("reload") ? tag.getInt("reload") : -1;
-            int maxCd = (int) (20 / rps - 1);
-            int cooldown = tag.contains("cooldown") ? tag.getInt("cooldown") : 0;
-
-            if (clip > 0 && reload == -1 && cooldown <= 0) {
-                fireBullet(world, user, hand);
-                playSound(world, user);
-                tag.putInt("cooldown", maxCd);
-                tag.putDouble("clip", clip - 1);
-            } else if (clip == 0 && cooldown == 0) {
+            if (serializer.clip > 0 && serializer.reload == -1 && serializer.cooldown <= 0) {
+                fireBullet(world, hitman, hand, target, semi);
+                playSound(world, hitman);
+                serializer.cooldown = maxCd;
+                serializer.clip--;
+            } else if (serializer.clip == 0 && serializer.cooldown == 0) {
                 world.playSound(
                         null,
-                        user.getBlockPos(),
+                        hitman.getBlockPos(),
                         Sounds.DRY_FIRE_EVENT,
                         SoundCategory.PLAYERS,
                         1f,
                         1f
                 );
-                tag.putInt("cooldown", maxCd);
+                serializer.cooldown = maxCd;
             }
+            serializer.toTag(stack.getOrCreateTag());
             return TypedActionResult.pass(stack);
         }
-
-        return TypedActionResult.pass(user.getStackInHand(hand));
+        serializer.toTag(stack.getOrCreateTag());
+        return TypedActionResult.pass(hitman.getStackInHand(hand));
     }
 
-    private void playSound(World world, PlayerEntity user) {
+    @Override
+    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+        ItemStack stack = user.getStackInHand(hand);
+        GunNBTSerializer serializer = new GunNBTSerializer(stack.getOrCreateTag(), this);
+        if (serializer.mode == 2) {
+            user.setCurrentHand(hand);
+            return TypedActionResult.pass(stack);
+        } else
+            return action(world, user, hand, null, false);
+    }
+
+    public void playSound(World world, LivingEntity user) {
 
         SoundEvent event;
         switch (getType()) {
@@ -263,19 +316,19 @@ public class GunItem extends Item {
         }
     }
 
-
     //Override for custom behavior
-    protected void fireBullet(World world, PlayerEntity user, Hand hand) {
+    public void fireBullet(World world, LivingEntity user, Hand hand, @Nullable LivingEntity target, boolean semi) {
         Bullet bulletEntity = new Bullet(user, world);
         bulletEntity.setPos(user.getX(), user.getEyeY(), user.getZ());
-        bulletEntity.setVelocity(getRotationVectorSpray(user).multiply(5));
+        setBulletVector(bulletEntity, user, target, semi);
         bulletEntity.setInitialPos(new Vec3d(user.getX(), user.getEyeY(), user.getZ()));
-        bulletEntity.setProperties(damage, armorPen, dropoff, range);
+        Config config = FlytreGuns.CONFIG_HANDLER.getConfig();
+        bulletEntity.setProperties(user instanceof PlayerEntity ? damage * config.getPlayerDamageModifier() : damage * config.getEntityDamageModifier(), armorPen, dropoff, range);
         bulletSetup(world, user, hand, bulletEntity);
         world.spawnEntity(bulletEntity);
     }
 
-    public void bulletSetup(World world, PlayerEntity user, Hand hand, Bullet bullet) {
+    public void bulletSetup(World world, LivingEntity user, Hand hand, Bullet bullet) {
 
     }
 
@@ -311,11 +364,30 @@ public class GunItem extends Item {
         return reloadTime;
     }
 
-    protected Vec3d getRotationVectorSpray(PlayerEntity user) {
-        int tSpray = spray;
+    public int getEffectiveSpray(LivingEntity user) {
+        return spray;
+    }
+
+    public void setBulletVector(Bullet bullet, LivingEntity user, LivingEntity target, boolean semi) {
+        float tSpray = getEffectiveSpray(user);
+        if (semi) {
+            tSpray *= 2.0 / 3.0;
+        }
         if (user.isSneaking())
-            tSpray = Math.max(0, Math.min((spray * 2) / 5, spray - 5));
-        return getRotationVector((float) (user.pitch + (Math.random() * (tSpray + 1)) - 1 - tSpray / 2.0), (float) (user.yaw + (Math.random() * (tSpray + 1)) - 1 - tSpray / 2.0));
+            tSpray = Math.max(0, Math.min((tSpray * 2) / 5, tSpray - 5));
+        if (user instanceof PlayerEntity)
+            bullet.setVelocity(getRotationVector((float) (user.pitch + getSprayModifier(user, tSpray)), (float) (user.yaw + getSprayModifier(user, tSpray))).multiply(5));
+        else {
+            double d = target.getX() - user.getX();
+            double e = target.getBodyY(0.3333333333333333D) - bullet.getY();
+            double f = target.getZ() - user.getZ();
+            double g = MathHelper.sqrt(d * d + f * f);
+            bullet.setVelocity(d, e + g * 0.03D, f, 3.0F, tSpray);
+        }
+    }
+
+    private double getSprayModifier(LivingEntity user, double tSpray) {
+        return (Math.random() * (tSpray + 1)) - 1 - tSpray / 2.0;
     }
 
     protected Vec3d getRotationVector(float pitch, float yaw) {
@@ -342,7 +414,6 @@ public class GunItem extends Item {
             return name;
         return super.getOrCreateTranslationKey();
     }
-
 
     @Override
     public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
@@ -375,4 +446,58 @@ public class GunItem extends Item {
 
         super.appendTooltip(stack, world, tooltip, context);
     }
+
+    @Environment(EnvType.CLIENT)
+    public List<Text> sidebarInfo() {
+        List<Text> result = new ArrayList<>();
+
+        result.add(gunType == GunType.ROCKET ?
+                new TranslatableText("text.fguns.tooltip.damage.varies") :
+                new TranslatableText(gunType == GunType.SHOTGUN ? "text.fguns.tooltip.damage.shotgun" : "text.fguns.tooltip.damage", String.format("%.1f", getDamage()))
+        );
+
+        int fireSpeed = (20 / (int) (20 / getRps()));
+        result.add(new TranslatableText("text.fguns.tooltip.rps", fireSpeed == 0 ? String.format("%.1f", getRps()) : fireSpeed));
+        result.add(new TranslatableText("text.fguns.tooltip.range", getRange()));
+
+        if (getArmorPen() > 0)
+            result.add(new TranslatableText("text.fguns.tooltip.armor_pierce", (int) (getArmorPen() * 100)));
+
+        if (getDropoff() > 0)
+            if (getDropoff() > 0)
+                result.add(new TranslatableText("text.fguns.tooltip.dropoff", (int) (100 * (getDropoff() * 100)) / 100));
+            else if (getDropoff() < 0)
+                result.add(new TranslatableText("text.fguns.tooltip.dropoff.increase", ((int) (100 * (Math.abs(getDropoff()) * 100))) / 100));
+
+        result.add(new TranslatableText("text.fguns.tooltip.clip", clipSize, reloadTime));
+
+        return result;
+    }
+
+
+    public static class GunNBTSerializer {
+        public int clip;
+        public int mode;
+        public int reload;
+        public int partialClip;
+        public int cooldown;
+
+        public GunNBTSerializer(CompoundTag tag, GunItem gunItem) {
+            this.clip = tag.contains("clip") ? tag.getInt("clip") : gunItem.getClipSize();
+            this.reload = tag.contains("reload") ? tag.getInt("reload") : -1;
+            this.cooldown = tag.contains("cooldown") ? tag.getInt("cooldown") : 0;
+            this.mode = tag.contains("mode") ? tag.getInt("mode") : 0;
+            this.partialClip = tag.contains("partialClip") ? tag.getInt("partialClip") : 0;
+        }
+
+
+        public void toTag(CompoundTag tag) {
+            tag.putInt("clip", clip);
+            tag.putInt("reload", reload);
+            tag.putInt("cooldown", cooldown);
+            tag.putInt("mode", mode);
+            tag.putInt("partialClip", partialClip);
+        }
+    }
+
 }

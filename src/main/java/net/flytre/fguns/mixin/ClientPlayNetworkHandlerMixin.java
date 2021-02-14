@@ -24,14 +24,14 @@ public class ClientPlayNetworkHandlerMixin {
     private ClientWorld world;
 
     @Inject(method = "onEntitySpawn", at = @At(value = "RETURN"))
-    private void spawnBullet(EntitySpawnS2CPacket packet, CallbackInfo info) {
+    private void fguns$spawnBullet(EntitySpawnS2CPacket packet, CallbackInfo info) {
         double d = packet.getX();
         double e = packet.getY();
         double f = packet.getZ();
         EntityType<?> entityType = packet.getEntityTypeId();
         Entity entity = null;
         if (entityType == FlytreGuns.BULLET) {
-            entity = new Bullet(d,e,f,world);
+            entity = new Bullet(d, e, f, world);
         }
 
         if (entity != null) {

@@ -31,10 +31,4 @@ public class BulletModel extends EntityModel<Bullet> {
         bb_main.render(matrixStack, buffer, packedLight, packedOverlay);
     }
 
-    public void setRotationAngle(ModelPart bone, float x, float y, float z) {
-        bone.pitch = x;
-        bone.yaw = y;
-        bone.roll = z;
-    }
-
 }

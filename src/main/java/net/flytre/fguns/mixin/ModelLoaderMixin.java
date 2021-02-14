@@ -1,6 +1,6 @@
 package net.flytre.fguns.mixin;
 
-import net.flytre.fguns.ConfigHandler;
+import net.flytre.fguns.config.CustomGunConfigHandler;
 import net.flytre.fguns.guns.GunItem;
 import net.minecraft.client.render.model.ModelLoader;
 import net.minecraft.client.render.model.UnbakedModel;
@@ -11,6 +11,7 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -38,10 +39,10 @@ public abstract class ModelLoaderMixin {
     protected abstract void loadModel(Identifier id) throws Exception;
 
     @Inject(method = "getOrLoadModel", at = @At("HEAD"), cancellable = true)
-    public void overrideModelForCustomGuns(Identifier id, CallbackInfoReturnable<UnbakedModel> cir) {
-        if (id.getNamespace().equals("fguns") && ConfigHandler.LOADED_GUNS.containsKey(id.getPath())) {
+    public void fguns$overrideModelForCustomGuns(Identifier id, CallbackInfoReturnable<UnbakedModel> cir) {
+        if (id.getNamespace().equals("fguns") && CustomGunConfigHandler.LOADED_GUNS.containsKey(id.getPath())) {
             for (GunItem item : GunItem.GUNS) {
-                if (item.getType() == ConfigHandler.LOADED_GUNS.get(id.getPath()).getType() && !ConfigHandler.CONFIG_ADDED_GUNS.contains(item)) {
+                if (item.getType() == CustomGunConfigHandler.LOADED_GUNS.get(id.getPath()).getType() && !CustomGunConfigHandler.CONFIG_ADDED_GUNS.contains(item)) {
                     Identifier id2 = Registry.ITEM.getId(item);
                     if (id instanceof ModelIdentifier) {
                         ModelIdentifier id3 = new ModelIdentifier(id2, ((ModelIdentifier) id).getVariant());
@@ -57,6 +58,7 @@ public abstract class ModelLoaderMixin {
         }
     }
 
+    @Unique
     private UnbakedModel helper(Identifier id) {
         if (unbakedModels.containsKey(id)) {
             return this.unbakedModels.get(id);

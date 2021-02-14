@@ -1,0 +1,14 @@
+{
+  "type": "fguns:workbench",
+  "ingredients": [
+    {
+      "item": "minecraft:iron_ingot",
+      "count": 16
+    },
+    {
+      "item": "minecraft:redstone",
+      "count": 4
+    }
+  ],
+  "result": "fguns:laser_speed"
+}

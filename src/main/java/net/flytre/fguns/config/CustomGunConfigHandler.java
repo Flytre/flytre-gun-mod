@@ -1,4 +1,4 @@
-package net.flytre.fguns;
+package net.flytre.fguns.config;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -19,7 +19,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
-public class ConfigHandler {
+public class CustomGunConfigHandler {
 
 
     public static HashMap<String, GunItem> LOADED_GUNS = new HashMap<>();
@@ -66,7 +66,7 @@ public class ConfigHandler {
     }
 
     private static void createGun(double damage, double armorPen, double rps, double dropoff, int spray, int range, int clip, double reload, GunType type, String name, String id) {
-        GunItem gun = null;
+        GunItem gun;
         if (type == GunType.SNIPER) {
             gun = new Sniper(damage, armorPen, rps, dropoff, spray, range, clip, reload, type);
         } else if (type == GunType.SHOTGUN) {

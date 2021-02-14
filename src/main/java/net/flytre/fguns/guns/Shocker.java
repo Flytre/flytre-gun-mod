@@ -1,12 +1,16 @@
 package net.flytre.fguns.guns;
 
 import net.flytre.fguns.BulletDamageSource;
+import net.flytre.fguns.FlytreGuns;
 import net.flytre.fguns.entity.Bullet;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.TargetPredicate;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.mob.HostileEntity;
+import net.minecraft.entity.passive.GolemEntity;
+import net.minecraft.entity.passive.PassiveEntity;
+import net.minecraft.item.Item;
 import net.minecraft.particle.BlockStateParticleEffect;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
@@ -36,10 +40,11 @@ public class Shocker extends GunItem {
         BlockStateParticleEffect particle2 = new BlockStateParticleEffect(ParticleTypes.BLOCK, Blocks.BLACK_CONCRETE.getDefaultState());
         Vec3d lastEntity = currentEntity.getPos();
 
-        while ((currentEntity = getNextEntity(hit, currentEntity)) != null) {
+        while ((currentEntity = getNextEntity(bullet, hit, currentEntity)) != null) {
 
             hit.add(currentEntity);
             drawLineTo(lastEntity, currentEntity.getPos(), particle, currentEntity.world);
+            drawLineTo(lastEntity, currentEntity.getPos(), particle2, currentEntity.world);
             damage *= 0.8f;
             lastEntity = currentEntity.getPos();
 
@@ -51,10 +56,15 @@ public class Shocker extends GunItem {
         }
     }
 
-    private static LivingEntity getNextEntity(List<Entity> hit, LivingEntity currentEntity) {
+    private static LivingEntity getNextEntity(Bullet bullet, List<Entity> hit, LivingEntity currentEntity) {
         TargetPredicate predicate = new TargetPredicate();
-        predicate.includeTeammates();
-        predicate.setPredicate(i -> !(hit.contains(i)));
+        Entity owner = bullet.getOwner();
+
+        if (!(owner instanceof HostileEntity))
+            predicate.setPredicate(i -> !(hit.contains(i)) && !(i == bullet.getOwner()) && !(i instanceof PassiveEntity) && !(i instanceof GolemEntity));
+        else
+            predicate.setPredicate(i -> !(hit.contains(i)) && !(i == bullet.getOwner()) && !(i instanceof HostileEntity));
+
         return currentEntity.world.getClosestEntity(LivingEntity.class, predicate, currentEntity, currentEntity.getX(), currentEntity.getY(), currentEntity.getZ(), currentEntity.getBoundingBox().expand(10));
     }
 
@@ -69,8 +79,12 @@ public class Shocker extends GunItem {
         }
     }
 
+    public Item getAmmoItem() {
+        return FlytreGuns.ENERGY_CELL;
+    }
+
     @Override
-    public void bulletSetup(World world, PlayerEntity user, Hand hand, Bullet bullet) {
+    public void bulletSetup(World world, LivingEntity user, Hand hand, Bullet bullet) {
         bullet.setProperties(GunType.SHOCKER);
 //        bullet.setVelocity(bullet.getVelocity().multiply(4));
     }

@@ -1,0 +1,14 @@
+{
+  "type": "fguns:workbench",
+  "ingredients": [
+    {
+      "item": "minecraft:iron_ingot",
+      "count": 72
+    },
+    {
+      "item": "minecraft:redstone",
+      "count": 32
+    }
+  ],
+  "result": "fguns:triforce"
+}

@@ -1,0 +1,14 @@
+{
+  "type": "fguns:workbench",
+  "ingredients": [
+    {
+      "item": "minecraft:iron_ingot",
+      "count": 80
+    },
+    {
+      "item": "minecraft:redstone",
+      "count": 4
+    }
+  ],
+  "result": "fguns:shotgun"
+}
