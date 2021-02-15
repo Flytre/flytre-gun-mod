@@ -1,5 +1,8 @@
 package net.flytre.fguns.entity;
 
+import io.netty.buffer.Unpooled;
+import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.flytre.fguns.BulletDamageSource;
 import net.flytre.fguns.FlytreGuns;
 import net.flytre.fguns.ParticleHelper;
@@ -18,14 +21,18 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.projectile.thrown.ThrownEntity;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.particle.BlockStateParticleEffect;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraft.world.explosion.Explosion;
+
+import java.util.Collection;
 
 public class Bullet extends ThrownEntity {
 
@@ -44,6 +51,8 @@ public class Bullet extends ThrownEntity {
     private int range;
     private Vec3d initialPos;
     private double initialSpeed = -1;
+
+    private Vec3d lastVelocity;
 
 
     public Bullet(EntityType<? extends Bullet> entityType, World world) {
@@ -117,6 +126,8 @@ public class Bullet extends ThrownEntity {
     @Override
     public void tick() {
 
+        System.out.println(world.isClient + " pos = " + getPos());
+
         //Knock bullet outside range
         if (!world.isClient && !this.hasNoGravity() && distSquared(initialPos.x, initialPos.z, getX(), getZ()) >= range * range) {
             Vec3d vec3d2 = this.getVelocity();
@@ -131,6 +142,21 @@ public class Bullet extends ThrownEntity {
             if (currentSpeed / initialSpeed < 0.9) {
                 setVelocity(getVelocity().multiply(1.1));
             }
+        }
+
+        if (!world.isClient) {
+
+            if (lastVelocity != getVelocity()) {
+                Collection<ServerPlayerEntity> players = PlayerLookup.tracking(this);
+                for (ServerPlayerEntity playerEntity : players) {
+                    BulletPacket packet = new BulletPacket(this);
+                    PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
+                    packet.write(buf);
+                    ServerPlayNetworking.send(playerEntity, FlytreGuns.BULLET_VELOCITY_PACKET_ID, buf);
+                }
+            }
+
+            lastVelocity = getVelocity();
         }
 
 

@@ -10,6 +10,7 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
+import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -38,12 +39,19 @@ public class ClientPlayNetworkHandlerMixin {
             int i = packet.getId();
             entity.updateTrackedPosition(d, e, f);
             entity.refreshPositionAfterTeleport(d, e, f);
-            entity.pitch = (float)(packet.getPitch() * 360) / 256.0F;
-            entity.yaw = (float)(packet.getYaw() * 360) / 256.0F;
+            entity.pitch = (float) (packet.getPitch() * 360) / 256.0F;
+            entity.yaw = (float) (packet.getYaw() * 360) / 256.0F;
             entity.setEntityId(i);
             entity.setUuid(packet.getUuid());
             this.world.addEntity(i, entity);
         }
 
+    }
+
+    @Inject(method = "onVelocityUpdate", at = @At("HEAD"), cancellable = true)
+    public void fguns$onVelocityUpdate(EntityVelocityUpdateS2CPacket packet, CallbackInfo ci) {
+        Entity entity = this.world.getEntityById(packet.getId());
+        if (entity instanceof Bullet)
+            ci.cancel();
     }
 }

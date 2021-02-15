@@ -41,6 +41,7 @@ public class FlytreGuns implements ModInitializer {
     public static final Identifier REQUEST_RECIPE_PACKET_ID = new Identifier("fguns", "request_recipe");
     public static final Identifier NEXT_RECIPE_PACKET_ID = new Identifier("fguns", "next_recipe");
     public static final Identifier CRAFT_ITEM_PACKET_ITEM = new Identifier("fguns", "assemble");
+    public static final Identifier BULLET_VELOCITY_PACKET_ID = new Identifier("fguns", "velocity_packet");
 
     //Item
     public static final ItemGroup TAB = FabricItemGroupBuilder.build(

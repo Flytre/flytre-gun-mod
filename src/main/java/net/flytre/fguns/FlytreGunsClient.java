@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.client.rendereregistry.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.client.screenhandler.v1.ScreenRegistry;
 import net.flytre.fguns.entity.BulletEntityRenderer;
 import net.flytre.fguns.entity.BulletModel;
+import net.flytre.fguns.entity.BulletPacket;
 import net.flytre.fguns.workbench.WorkbenchRecipe;
 import net.flytre.fguns.workbench.WorkbenchScreen;
 
@@ -31,6 +32,16 @@ public class FlytreGunsClient implements ClientModInitializer {
             client.execute(() -> {
                 if (client.currentScreen instanceof WorkbenchScreen)
                     ((WorkbenchScreen) client.currentScreen).setCurrentRecipe(recipe);
+            });
+        });
+
+        ClientPlayNetworking.registerGlobalReceiver(FlytreGuns.BULLET_VELOCITY_PACKET_ID, (client, handler, buf, responseSender) -> {
+            BulletPacket packet = new BulletPacket();
+            packet.read(buf);
+            assert client.world != null;
+            packet.apply(client.world);
+            client.execute(() -> {
+                packet.apply(client.world);
             });
         });
 

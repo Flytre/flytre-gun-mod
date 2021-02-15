@@ -3,6 +3,7 @@ package net.flytre.fguns.guns;
 import net.flytre.fguns.BulletDamageSource;
 import net.flytre.fguns.FlytreGuns;
 import net.flytre.fguns.entity.Bullet;
+import net.flytre.flytre_lib.common.util.ParticleUtils;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -12,8 +13,8 @@ import net.minecraft.entity.passive.GolemEntity;
 import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.item.Item;
 import net.minecraft.particle.BlockStateParticleEffect;
-import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.math.Vec3d;
@@ -28,9 +29,13 @@ public class Shocker extends GunItem {
     }
 
     public static void chain(Bullet bullet, EntityHitResult entityHitResult, float damage) {
+
+        if (bullet.world.isClient)
+            return;
+
+
         List<Entity> hit = new ArrayList<>();
         hit.add(entityHitResult.getEntity());
-
 
         if (!(entityHitResult.getEntity() instanceof LivingEntity))
             return;
@@ -43,8 +48,8 @@ public class Shocker extends GunItem {
         while ((currentEntity = getNextEntity(bullet, hit, currentEntity)) != null) {
 
             hit.add(currentEntity);
-            drawLineTo(lastEntity, currentEntity.getPos(), particle, currentEntity.world);
-            drawLineTo(lastEntity, currentEntity.getPos(), particle2, currentEntity.world);
+            ParticleUtils.drawLineTo(lastEntity, currentEntity.getPos(), particle, (ServerWorld) currentEntity.world);
+            ParticleUtils.drawLineTo(lastEntity, currentEntity.getPos(), particle2, (ServerWorld) currentEntity.world);
             damage *= 0.8f;
             lastEntity = currentEntity.getPos();
 
@@ -68,16 +73,6 @@ public class Shocker extends GunItem {
         return currentEntity.world.getClosestEntity(LivingEntity.class, predicate, currentEntity, currentEntity.getX(), currentEntity.getY(), currentEntity.getZ(), currentEntity.getBoundingBox().expand(10));
     }
 
-
-    public static void drawLineTo(Vec3d a, Vec3d b, ParticleEffect particle, World world) {
-        double dist = a.distanceTo(b);
-        for (double i = 0; i < 1; i += Math.min(0.1, 1 / (dist * 2))) {
-            double x = a.getX() + (b.getX() - a.getX()) * i;
-            double y = a.getY() + 1 + (b.getY() - a.getY()) * i;
-            double z = a.getZ() + 1 + (b.getZ() - a.getZ()) * i;
-            world.addImportantParticle(particle, true, x, y, z, 0, 0, 0);
-        }
-    }
 
     public Item getAmmoItem() {
         return FlytreGuns.ENERGY_CELL;
