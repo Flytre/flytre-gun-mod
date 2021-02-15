@@ -19,6 +19,7 @@ import net.minecraft.block.Material;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
@@ -42,12 +43,11 @@ public class FlytreGuns implements ModInitializer {
     public static final Identifier NEXT_RECIPE_PACKET_ID = new Identifier("fguns", "next_recipe");
     public static final Identifier CRAFT_ITEM_PACKET_ITEM = new Identifier("fguns", "assemble");
     public static final Identifier BULLET_VELOCITY_PACKET_ID = new Identifier("fguns", "velocity_packet");
-
+    public static final GunItem LETHAL_MARK = new GunItem(5, .40, 2, 0.02, 3, 30, 10, 1.4, GunType.PISTOL);
     //Item
     public static final ItemGroup TAB = FabricItemGroupBuilder.build(
             new Identifier("fguns", "all"),
             () -> new ItemStack(FlytreGuns.LETHAL_MARK));
-    public static final GunItem LETHAL_MARK = new GunItem(5, .40, 2, 0.02, 3, 30, 10, 1.4, GunType.PISTOL);
     public static final GunItem BEAMER = new GunItem(12, .50, 1, 0.02, 3, 30, 6, 3.0, GunType.PISTOL);
     public static final GunItem LASER_SPEED = new GunItem(4, .20, 4, 0.03, 6, 25, 20, 1.4, GunType.PISTOL);
     public static final GunItem HUNTER = new GunItem(5, .40, 6, 0.04, 9, 25, 25, 3.2, GunType.RIFLE);
@@ -68,18 +68,14 @@ public class FlytreGuns implements ModInitializer {
     public static final Item ROCKET_AMMO = new Item(new Item.Settings().group(FlytreGuns.TAB));
     public static final Item ENERGY_CELL = new Item(new Item.Settings().group(FlytreGuns.TAB));
     public static final Item MYSTERY_GUN = new MysteryGun();
-
-
-    public static boolean MOB_AI_RELEASED = false;
-
     //Entity
     public static final EntityType<Bullet> BULLET = Registry.register(
             Registry.ENTITY_TYPE,
             new Identifier("fguns", "bullet"),
             FabricEntityTypeBuilder.<Bullet>create(SpawnGroup.MISC, Bullet::new).dimensions(new EntityDimensions(0.5F, 0.2F, true)).trackRangeChunks(4).trackedUpdateRate(20).build());
-
     //Workbench
     public static final WorkbenchBlock WORKBENCH = new WorkbenchBlock(FabricBlockSettings.of(Material.METAL).strength(3.0f));
+    public static boolean MOB_AI_RELEASED = false;
     public static BlockEntityType<WorkbenchEntity> WORKBENCH_ENTITY;
     public static ScreenHandlerType<WorkbenchScreenHandler> WORKBENCH_SCREEN_HANDLER;
     public static RecipeType<WorkbenchRecipe> WORKBENCH_RECIPE;
@@ -185,6 +181,8 @@ public class FlytreGuns implements ModInitializer {
                         if (actualRecipe.matches(player.inventory, player.world)) {
                             ItemStack stack = actualRecipe.craft(player.inventory);
                             stack = InventoryUtils.putStackInInventory(stack, player.inventory, 0, 36);
+                            if (!stack.isEmpty())
+                                player.world.spawnEntity(new ItemEntity(player.world, player.getX(), player.getY(), player.getZ(), stack));
                         }
                     }
                 }
