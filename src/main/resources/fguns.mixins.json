@@ -4,10 +4,7 @@
   "package": "net.flytre.fguns.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "AbstractSkeletonEntityMixin",
-    "HostileEntityMixin",
-    "LivingEntityMixin",
-    "MobEntityMixin",
+    "AbstractSkeletonEntityMixin", "FlareWorldMixin", "HostileEntityMixin", "LivingEntityMixin", "MobEntityMixin",
     "ZombieEntityMixin"
   ],
   "client": [
@@ -21,7 +18,8 @@
     "ItemRendererMixin",
     "MinecraftClientMixin",
     "MobEntityRendererMixin",
-    "ModelLoaderMixin"
+    "ModelLoaderMixin",
+    "ParticleManagerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

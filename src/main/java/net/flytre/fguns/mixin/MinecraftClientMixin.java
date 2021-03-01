@@ -2,7 +2,7 @@ package net.flytre.fguns.mixin;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.flytre.fguns.guns.GunItem;
+import net.flytre.fguns.gun.AbstractGun;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -31,7 +31,7 @@ public class MinecraftClientMixin {
         for (Hand hand : Hand.values()) {
             ItemStack itemStack = this.player.getStackInHand(hand);
             if (!itemStack.isEmpty()) {
-                if (itemStack.getItem() instanceof GunItem)
+                if (itemStack.getItem() instanceof AbstractGun)
                     itemUseCooldown = 0;
                 return;
             }

@@ -5,7 +5,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.flytre.fguns.FlytreGuns;
+import net.flytre.fguns.Packets;
+import net.flytre.flytre_lib.client.gui.CoordinateProvider;
 import net.flytre.flytre_lib.common.util.InventoryUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
@@ -32,7 +33,7 @@ import net.minecraft.util.Identifier;
 import java.util.Map;
 import java.util.Objects;
 
-public class WorkbenchScreen extends HandledScreen<WorkbenchScreenHandler> {
+public class WorkbenchScreen extends HandledScreen<WorkbenchScreenHandler> implements CoordinateProvider {
 
     private static final Identifier INVENTORY_TEXTURE = new Identifier("fguns:textures/gui/workbench_base.png");
     private static final Identifier PANEL_TEXTURE = new Identifier("fguns:textures/gui/workbench_side.png");
@@ -152,21 +153,21 @@ public class WorkbenchScreen extends HandledScreen<WorkbenchScreenHandler> {
         addButton(new ButtonWidget(this.x, this.y, 10, 20, new LiteralText("\u276E"), (button) -> {
             PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
             buf.writeInt(-1);
-            ClientPlayNetworking.send(FlytreGuns.NEXT_RECIPE_PACKET_ID, buf);
-            ClientPlayNetworking.send(FlytreGuns.REQUEST_RECIPE_PACKET_ID, PacketByteBufs.empty());
+            ClientPlayNetworking.send(Packets.NEXT_RECIPE, buf);
+            ClientPlayNetworking.send(Packets.REQUEST_RECIPE, PacketByteBufs.empty());
         }));
         addButton(new ButtonWidget(this.x + 166, this.y, 10, 20, new LiteralText("\u276F"), (button) -> {
             PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
             buf.writeInt(1);
-            ClientPlayNetworking.send(FlytreGuns.NEXT_RECIPE_PACKET_ID, buf);
-            ClientPlayNetworking.send(FlytreGuns.REQUEST_RECIPE_PACKET_ID, PacketByteBufs.empty());
+            ClientPlayNetworking.send(Packets.NEXT_RECIPE, buf);
+            ClientPlayNetworking.send(Packets.REQUEST_RECIPE, PacketByteBufs.empty());
         }));
 
         addButton(new ButtonWidget(this.x + 198, this.y + 10, 80, 20, new TranslatableText("gui.fguns.assemble"), (button) -> {
             if (currentRecipe != null) {
                 PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
                 buf.writeIdentifier(currentRecipe.getId());
-                ClientPlayNetworking.send(FlytreGuns.CRAFT_ITEM_PACKET_ITEM, buf);
+                ClientPlayNetworking.send(Packets.CRAFT_ITEM, buf);
             }
         }));
 
@@ -178,7 +179,16 @@ public class WorkbenchScreen extends HandledScreen<WorkbenchScreenHandler> {
             statList = new StatList(client, 40, height, y + 5, this.y + 150, 25, this, x - 22);
         }
 
-        ClientPlayNetworking.send(FlytreGuns.REQUEST_RECIPE_PACKET_ID, PacketByteBufs.empty());
+        ClientPlayNetworking.send(Packets.REQUEST_RECIPE, PacketByteBufs.empty());
     }
 
+    @Override
+    public int getX() {
+        return x;
+    }
+
+    @Override
+    public int getY() {
+        return y;
+    }
 }

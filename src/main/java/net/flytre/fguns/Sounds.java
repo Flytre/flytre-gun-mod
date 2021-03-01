@@ -29,6 +29,9 @@ public class Sounds {
     public static final Identifier SHOCKER_FIRE = new Identifier("fguns:shocker.fire");
     public static final SoundEvent SHOCKER_FIRE_EVENT = new SoundEvent(SHOCKER_FIRE);
 
+    public static final Identifier FLARE_BURN = new Identifier("fguns:flare.burn");
+    public static final SoundEvent FLARE_BURN_EVENT = new SoundEvent(FLARE_BURN);
+
 
     public static void init() {
         Registry.register(Registry.SOUND_EVENT, SNIPER_FIRE, SNIPER_FIRE_EVENT);
@@ -39,5 +42,6 @@ public class Sounds {
         Registry.register(Registry.SOUND_EVENT, SLIME_FIRE, SLIME_FIRE_EVENT);
         Registry.register(Registry.SOUND_EVENT, ROCKET_FIRE, ROCKET_FIRE_EVENT);
         Registry.register(Registry.SOUND_EVENT, SHOCKER_FIRE, SHOCKER_FIRE_EVENT);
+        Registry.register(Registry.SOUND_EVENT, FLARE_BURN, FLARE_BURN_EVENT);
     }
 }

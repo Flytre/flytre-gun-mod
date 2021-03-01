@@ -1,6 +1,6 @@
 package net.flytre.fguns.entity;
 
-import net.flytre.fguns.guns.GunItem;
+import net.flytre.fguns.gun.AbstractGun;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.mob.HostileEntity;
@@ -29,13 +29,13 @@ public class BloodbathGoal extends Goal {
     }
 
     public boolean isHoldingGun() {
-        return hitman.getMainHandStack().getItem() instanceof GunItem;
+        return hitman.getMainHandStack().getItem() instanceof AbstractGun;
     }
 
-    public GunItem getHeldGun() {
+    public AbstractGun getHeldGun() {
         Item item = hitman.getMainHandStack().getItem();
-        assert item instanceof GunItem;
-        return (GunItem) item;
+        assert item instanceof AbstractGun;
+        return (AbstractGun) item;
     }
 
     public int getRange() {
@@ -94,7 +94,7 @@ public class BloodbathGoal extends Goal {
 
         if (bl) {
             ItemStack stack = hitman.getStackInHand(Hand.MAIN_HAND);
-            GunItem.GunNBTSerializer serializer = new GunItem.GunNBTSerializer(stack.getOrCreateTag(), getHeldGun());
+            AbstractGun.GunNBTSerializer serializer = new AbstractGun.GunNBTSerializer(stack.getOrCreateTag(), getHeldGun());
             if (serializer.clip != 0 || serializer.cooldown != 0)
                 getHeldGun().action(hitman.world, hitman, Hand.MAIN_HAND, target, false);
         }
@@ -102,8 +102,8 @@ public class BloodbathGoal extends Goal {
 
     public void tickGun() {
         ItemStack stack = hitman.getMainHandStack();
-        GunItem gun = getHeldGun();
-        GunItem.GunNBTSerializer serializer = new GunItem.GunNBTSerializer(stack.getOrCreateTag(), gun);
+        AbstractGun gun = getHeldGun();
+        AbstractGun.GunNBTSerializer serializer = new AbstractGun.GunNBTSerializer(stack.getOrCreateTag(), gun);
         if (serializer.reload != -1 || serializer.clip == 0) {
             if (serializer.reload >= 0) {
                 double ammoCalc = (double) gun.getClipSize() / ((int) (gun.getReloadTime() * 20));

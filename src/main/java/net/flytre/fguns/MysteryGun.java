@@ -1,6 +1,6 @@
 package net.flytre.fguns;
 
-import net.flytre.fguns.guns.GunItem;
+import net.flytre.fguns.gun.AbstractGun;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -16,7 +16,7 @@ public class MysteryGun extends Item {
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
         if(entity instanceof PlayerEntity) {
             PlayerEntity living = (PlayerEntity) entity;
-            living.inventory.setStack(slot,new ItemStack(GunItem.randomGun(),1));
+            living.inventory.setStack(slot, new ItemStack(AbstractGun.randomGun(), 1));
         }
         super.inventoryTick(stack, world, entity, slot, selected);
     }

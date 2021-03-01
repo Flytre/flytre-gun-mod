@@ -3,8 +3,7 @@ package net.flytre.fguns.mixin;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.flytre.fguns.guns.GunItem;
-import net.flytre.fguns.guns.GunType;
+import net.flytre.fguns.gun.AbstractGun;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.render.BufferBuilder;
@@ -47,13 +46,9 @@ public class InGameHudMixin {
             return;
 
         Item item = mc.player.getMainHandStack().getItem();
-        if (item instanceof GunItem && mc.player.isSneaking()) {
-            GunType type = ((GunItem) item).getType();
-            if (type != GunType.PISTOL && type != GunType.MINIGUN && type != GunType.SLIME)
-                if (this.client.options.getPerspective().isFirstPerson()) {
-                    this.renderScopeOverlay();
-                }
-        }
+        if (item instanceof AbstractGun && mc.player.isSneaking())
+            if (((AbstractGun) item).hasScope() && this.client.options.getPerspective().isFirstPerson())
+                this.renderScopeOverlay();
 
     }
 

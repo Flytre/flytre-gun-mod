@@ -1,6 +1,6 @@
 package net.flytre.fguns.workbench;
 
-import net.flytre.fguns.guns.GunItem;
+import net.flytre.fguns.gun.AbstractGun;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.EntryListWidget;
 import net.minecraft.client.util.math.MatrixStack;
@@ -38,10 +38,10 @@ public class StatList extends EntryListWidget<StatList.StatEntry> {
             ItemStack out = recipe.getOutput();
 
             List<Text> texts;
-            if (!(out.getItem() instanceof GunItem)) {
+            if (!(out.getItem() instanceof AbstractGun)) {
                 texts = new ArrayList<>();
             } else {
-                texts = ((GunItem) out.getItem()).sidebarInfo();
+                texts = ((AbstractGun) out.getItem()).sidebarInfo();
             }
             texts.forEach(i -> addEntry(new StatEntry(client, i)));
         }

@@ -3,6 +3,7 @@ package net.flytre.fguns.workbench;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.flytre.fguns.FlytreGuns;
+import net.flytre.fguns.Packets;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -44,7 +45,7 @@ public class WorkbenchEntity extends BlockEntity {
         PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
         buf.writeIdentifier(recipe.getId());
         FlytreGuns.WORKBENCH_SERIALIZER.write(buf, recipe);
-        ServerPlayNetworking.send((ServerPlayerEntity) client, FlytreGuns.RECEIVE_RECIPE_PACKET_ID, buf);
+        ServerPlayNetworking.send((ServerPlayerEntity) client, Packets.RECEIVE_RECIPE, buf);
     }
 
     @Override

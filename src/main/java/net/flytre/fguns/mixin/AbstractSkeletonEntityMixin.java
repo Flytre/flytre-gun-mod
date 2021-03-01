@@ -2,7 +2,7 @@ package net.flytre.fguns.mixin;
 
 import net.flytre.fguns.FlytreGuns;
 import net.flytre.fguns.entity.BloodbathGoal;
-import net.flytre.fguns.guns.GunItem;
+import net.flytre.fguns.gun.AbstractGun;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.goal.BowAttackGoal;
 import net.minecraft.entity.ai.goal.MeleeAttackGoal;
@@ -40,7 +40,7 @@ public abstract class AbstractSkeletonEntityMixin extends HostileEntity {
 
         if (this.world != null && !this.world.isClient) {
 
-            boolean bl = getMainHandStack().getItem() instanceof GunItem;
+            boolean bl = getMainHandStack().getItem() instanceof AbstractGun;
 
             if (bl) {
                 this.goalSelector.remove(this.meleeAttackGoal);

@@ -27,7 +27,7 @@ public class FlytreGunsClient implements ClientModInitializer {
 
         ScreenRegistry.register(FlytreGuns.WORKBENCH_SCREEN_HANDLER, WorkbenchScreen::new);
 
-        ClientPlayNetworking.registerGlobalReceiver(FlytreGuns.RECEIVE_RECIPE_PACKET_ID, (client, handler, buf, responseSender) -> {
+        ClientPlayNetworking.registerGlobalReceiver(Packets.RECEIVE_RECIPE, (client, handler, buf, responseSender) -> {
             WorkbenchRecipe recipe = FlytreGuns.WORKBENCH_SERIALIZER.read(buf.readIdentifier(), buf);
             client.execute(() -> {
                 if (client.currentScreen instanceof WorkbenchScreen)
@@ -35,7 +35,7 @@ public class FlytreGunsClient implements ClientModInitializer {
             });
         });
 
-        ClientPlayNetworking.registerGlobalReceiver(FlytreGuns.BULLET_VELOCITY_PACKET_ID, (client, handler, buf, responseSender) -> {
+        ClientPlayNetworking.registerGlobalReceiver(Packets.BULLET_VELOCITY, (client, handler, buf, responseSender) -> {
             BulletPacket packet = new BulletPacket();
             packet.read(buf);
             assert client.world != null;

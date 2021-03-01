@@ -4,10 +4,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.fabricmc.loader.api.FabricLoader;
-import net.flytre.fguns.guns.*;
-import net.minecraft.util.Identifier;
+import net.flytre.fguns.gun.AbstractGun;
+import net.flytre.fguns.gun.BulletProperties;
 import net.minecraft.util.JsonHelper;
-import net.minecraft.util.registry.Registry;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,8 +21,8 @@ import java.util.stream.Stream;
 public class CustomGunConfigHandler {
 
 
-    public static HashMap<String, GunItem> LOADED_GUNS = new HashMap<>();
-    public static Set<GunItem> CONFIG_ADDED_GUNS = new HashSet<>();
+    public static HashMap<String, AbstractGun> LOADED_GUNS = new HashMap<>();
+    public static Set<AbstractGun> CONFIG_ADDED_GUNS = new HashSet<>();
 
     public static void handleConfig() {
         Path location = FabricLoader.getInstance().getConfigDir();
@@ -59,33 +58,18 @@ public class CustomGunConfigHandler {
         int range = JsonHelper.getInt(object, "range");
         int clip = JsonHelper.getInt(object, "clip");
         double reload = JsonHelper.getFloat(object, "reload");
-        GunType type = GunType.valueOf(JsonHelper.getString(object, "type"));
+        BulletProperties type = BulletProperties.valueOf(JsonHelper.getString(object, "type"));
         String name = JsonHelper.getString(object, "name");
         String id = JsonHelper.getString(object, "id");
         createGun(damage, armorPen, rps, dropoff, spray, range, clip, reload, type, name, id);
     }
 
-    private static void createGun(double damage, double armorPen, double rps, double dropoff, int spray, int range, int clip, double reload, GunType type, String name, String id) {
-        GunItem gun;
-        if (type == GunType.SNIPER) {
-            gun = new Sniper(damage, armorPen, rps, dropoff, spray, range, clip, reload, type);
-        } else if (type == GunType.SHOTGUN) {
-            gun = new Shotgun(damage, armorPen, rps, dropoff, spray, range, clip, reload);
-        } else if (type == GunType.SLIME) {
-            gun = new SlimeGun(damage, armorPen, rps, dropoff, spray, range, clip, reload);
-        } else if (type == GunType.ROCKET) {
-            gun = new RocketLauncher(damage, armorPen, rps, dropoff, spray, range, clip, reload);
-        } else if (type == GunType.SHOCKER) {
-            gun = new Shocker(damage, armorPen, rps, dropoff, spray, range, clip, reload);
-        } else if (type == GunType.MINIGUN) {
-            gun = new Minigun(damage, armorPen, rps, dropoff, spray, range, clip, reload);
-        } else {
-            gun = new GunItem(damage, armorPen, rps, dropoff, spray, range, clip, reload, type);
-        }
-        gun.setName(name);
-        LOADED_GUNS.put(id, gun);
-        CONFIG_ADDED_GUNS.add(gun);
-        Registry.register(Registry.ITEM, new Identifier("fguns", id), gun);
+    private static void createGun(double damage, double armorPen, double rps, double dropoff, int spray, int range, int clip, double reload, BulletProperties type, String name, String id) {
+//        AbstractGun gun = null;
+//        gun.setName(name);
+//        LOADED_GUNS.put(id, gun);
+//        CONFIG_ADDED_GUNS.add(gun);
+//        Registry.register(Registry.ITEM, new Identifier("fguns", id), gun);
 
     }
 

@@ -5,9 +5,11 @@ import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.flytre.fguns.BulletDamageSource;
 import net.flytre.fguns.FlytreGuns;
+import net.flytre.fguns.Packets;
 import net.flytre.fguns.ParticleHelper;
-import net.flytre.fguns.guns.GunType;
-import net.flytre.fguns.guns.Shocker;
+import net.flytre.fguns.flare.FlareWorld;
+import net.flytre.fguns.gun.BulletProperties;
+import net.flytre.fguns.gun.Shocker;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.WorldRenderer;
@@ -25,6 +27,7 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.particle.BlockStateParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Vec3d;
@@ -75,17 +78,17 @@ public class Bullet extends ThrownEntity {
         super(FlytreGuns.BULLET, livingEntity, world);
     }
 
-    public GunType getProperties() {
-        return GunType.valueOf(this.dataTracker.get(GUN_TYPE));
+    public BulletProperties getProperties() {
+        return BulletProperties.valueOf(this.dataTracker.get(GUN_TYPE));
     }
 
-    public void setProperties(GunType properties) {
+    public void setProperties(BulletProperties properties) {
         this.getDataTracker().set(GUN_TYPE, properties.name());
     }
 
     @Override
     protected void initDataTracker() {
-        this.getDataTracker().startTracking(GUN_TYPE, GunType.PISTOL.name());
+        this.getDataTracker().startTracking(GUN_TYPE, BulletProperties.NONE.name());
     }
 
     public void setInitialPos(Vec3d initialPos) {
@@ -100,9 +103,12 @@ public class Bullet extends ThrownEntity {
         double dist = Math.sqrt(distSquared(initialPos.x, initialPos.z, getX(), getZ()));
         double modifiedDamage = damage * Math.pow(1 - dropoff, dist);
 
-        if (getProperties() == GunType.SHOCKER)
+        if (getProperties() == BulletProperties.SHOCKER)
             Shocker.chain(this, entityHitResult, (float) modifiedDamage);
-        else if (world.isClient) {
+
+        if (getProperties() == BulletProperties.FLARE) {
+            entity.setFireTicks(entity.getFireTicks() + 100);
+        } else if (world.isClient) {
             WorldRenderer worldRenderer = MinecraftClient.getInstance().worldRenderer;
             Vec3d pos = entity.getPos();
             double x = pos.x;
@@ -117,7 +123,7 @@ public class Bullet extends ThrownEntity {
         entity.timeUntilRegen = 0;
         entity.damage(new BulletDamageSource(this, this.getOwner()), (float) modifiedDamage);
 
-        if (getProperties() == GunType.SLIME && entity instanceof LivingEntity) {
+        if (getProperties() == BulletProperties.SLIME && entity instanceof LivingEntity) {
             ((LivingEntity) entity).addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 20, 2));
         }
     }
@@ -125,8 +131,6 @@ public class Bullet extends ThrownEntity {
 
     @Override
     public void tick() {
-
-        System.out.println(world.isClient + " pos = " + getPos());
 
         //Knock bullet outside range
         if (!world.isClient && !this.hasNoGravity() && distSquared(initialPos.x, initialPos.z, getX(), getZ()) >= range * range) {
@@ -152,7 +156,7 @@ public class Bullet extends ThrownEntity {
                     BulletPacket packet = new BulletPacket(this);
                     PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
                     packet.write(buf);
-                    ServerPlayNetworking.send(playerEntity, FlytreGuns.BULLET_VELOCITY_PACKET_ID, buf);
+                    ServerPlayNetworking.send(playerEntity, Packets.BULLET_VELOCITY, buf);
                 }
             }
 
@@ -161,13 +165,18 @@ public class Bullet extends ThrownEntity {
 
 
         //Sniper Trails
-        if (getProperties() == GunType.SNIPER && (lastX != 0 && 0 != lastZ))
+        if (getProperties() == BulletProperties.SNIPER && (lastX != 0 && 0 != lastZ))
             bulletTrails();
 
 
         lastX = getX();
         lastY = getY();
         lastZ = getZ();
+
+        if (getProperties() == BulletProperties.FLARE)
+            if (this.world.isClient)
+                this.world.addParticle(ParticleTypes.FIREWORK, this.getX(), this.getY() + 0.15D, this.getZ(), this.random.nextGaussian() * 0.05D, -this.getVelocity().y * 0.5D, this.random.nextGaussian() * 0.05D);
+
 
         super.tick();
     }
@@ -192,7 +201,7 @@ public class Bullet extends ThrownEntity {
         super.onCollision(hitResult);
 
 
-        if (getProperties() == GunType.SLIME) {
+        if (getProperties() == BulletProperties.SLIME) {
             //slime particles
             BlockStateParticleEffect particle = new BlockStateParticleEffect(ParticleTypes.BLOCK, Blocks.SLIME_BLOCK.getDefaultState());
             BlockStateParticleEffect particle2 = new BlockStateParticleEffect(ParticleTypes.BLOCK, Blocks.ICE.getDefaultState());
@@ -204,9 +213,13 @@ public class Bullet extends ThrownEntity {
 
         }
 
-        if (getProperties() == GunType.ROCKET) {
+        if (getProperties() == BulletProperties.ROCKET) {
             boolean bl = this.world.getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING);
             this.world.createExplosion(getOwner(), this.getX(), this.getY(), this.getZ(), 3f, bl, bl ? Explosion.DestructionType.DESTROY : Explosion.DestructionType.NONE);
+        }
+
+        if (getProperties() == BulletProperties.FLARE && !world.isClient && hitResult instanceof BlockHitResult) {
+            ((FlareWorld) world).setFlare(getBlockPos());
         }
 
         if (!this.world.isClient) {
@@ -217,8 +230,8 @@ public class Bullet extends ThrownEntity {
 
 
     protected float getGravity() {
-        return getProperties() == GunType.SNIPER ? 0.00F :
-                (getProperties() == GunType.ROCKET ? 0.08F : 0.03F);
+        return getProperties() == BulletProperties.SNIPER ? 0.00F :
+                (getProperties() == BulletProperties.ROCKET ? 0.08F : 0.03F);
     }
 
 
@@ -277,4 +290,5 @@ public class Bullet extends ThrownEntity {
     public int getRange() {
         return range;
     }
+
 }

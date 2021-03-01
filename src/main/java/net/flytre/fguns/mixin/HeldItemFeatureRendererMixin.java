@@ -1,6 +1,6 @@
 package net.flytre.fguns.mixin;
 
-import net.flytre.fguns.guns.GunItem;
+import net.flytre.fguns.gun.AbstractGun;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.feature.FeatureRenderer;
 import net.minecraft.client.render.entity.feature.FeatureRendererContext;
@@ -27,7 +27,7 @@ public abstract class HeldItemFeatureRendererMixin<T extends LivingEntity, M ext
     public void fguns$gunRender(MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, T livingEntity, float f, float g, float h, float j, float k, float l, CallbackInfo ci) {
 
         if (livingEntity instanceof ZombieEntity) {
-            if (livingEntity.getMainHandStack().getItem() instanceof GunItem) {
+            if (livingEntity.getMainHandStack().getItem() instanceof AbstractGun) {
                 matrixStack.translate(0.0, -0.2, 0.1);
                 matrixStack.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(50));
             }

@@ -32,13 +32,13 @@ public class Key {
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (reload.wasPressed()) {
-                ClientPlayNetworking.send(FlytreGuns.RELOAD_PACKET_ID, PacketByteBufs.empty());
+                ClientPlayNetworking.send(Packets.RELOAD, PacketByteBufs.empty());
             }
         });
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (firingPattern.wasPressed()) {
-                ClientPlayNetworking.send(FlytreGuns.FIRING_PATTERN_PACKET_ID, PacketByteBufs.empty());
+                ClientPlayNetworking.send(Packets.FIRING_PATTERN, PacketByteBufs.empty());
             }
         });
     }

@@ -1,6 +1,6 @@
 package net.flytre.fguns.entity;
 
-import net.flytre.fguns.guns.GunType;
+import net.flytre.fguns.gun.BulletProperties;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
@@ -28,7 +28,7 @@ public class BulletEntityRenderer extends EntityRenderer<Bullet> {
 
         matrixStack.push();
 
-        if(!(livingEntity.getProperties() == GunType.SNIPER)) {
+        if (!(livingEntity.getProperties() == BulletProperties.SNIPER)) {
 
             matrixStack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(livingEntity.yaw - 90.0F));
             matrixStack.multiply(Vector3f.POSITIVE_Z.getDegreesQuaternion(livingEntity.pitch));

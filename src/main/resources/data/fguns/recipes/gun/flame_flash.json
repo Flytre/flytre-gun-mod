@@ -1,0 +1,18 @@
+{
+  "type": "fguns:workbench",
+  "ingredients": [
+    {
+      "item": "minecraft:iron_ingot",
+      "count": 92
+    },
+    {
+      "item": "minecraft:redstone",
+      "count": 24
+    },
+    {
+      "item": "minecraft:fire_charge",
+      "count": 64
+    }
+  ],
+  "result": "fguns:flame_flash"
+}

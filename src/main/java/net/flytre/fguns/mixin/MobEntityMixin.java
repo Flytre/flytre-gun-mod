@@ -1,7 +1,7 @@
 package net.flytre.fguns.mixin;
 
 import net.flytre.fguns.FlytreGuns;
-import net.flytre.fguns.guns.GunItem;
+import net.flytre.fguns.gun.AbstractGun;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
@@ -48,7 +48,7 @@ public abstract class MobEntityMixin extends LivingEntity {
             return;
 
         if (!gunAdded) {
-            GunItem item = GunItem.getEquippedGun();
+            AbstractGun item = AbstractGun.getRandomEquipmentGun();
             if (item == null || !((Object) this instanceof HostileEntity))
                 return;
             ItemStack stack = new ItemStack(item, 1);

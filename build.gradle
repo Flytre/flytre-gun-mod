@@ -10,8 +10,13 @@ archivesBaseName = project.archives_base_name
 version = project.mod_version
 group = project.maven_group
 
+minecraft {
+    accessWidener("src/main/resources/fguns.accessWidener")
+}
+
 repositories {
     maven { url "https://jitpack.io" }
+    maven { url "https://maven.shedaniel.me/" }
     jcenter()
 }
 
@@ -26,7 +31,11 @@ dependencies {
 
     // PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
     // You may need to force-disable transitiveness on them.
-    modImplementation 'com.github.Flytre:FlytreLib:590880a51badc110a3678a21e43fe235103a65c2'
+    modImplementation 'com.github.Flytre:FlytreLib:4db5d4c93cc7d1203d2238cc205a5ab974759c6d'
+
+
+    modCompileOnly "me.shedaniel:RoughlyEnoughItems-api:5.10.183"
+    modRuntime "me.shedaniel:RoughlyEnoughItems:5.10.183"
 }
 
 processResources {

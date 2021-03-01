@@ -27,6 +27,7 @@
   "item.fguns.slimer": "§6Arcix §rSlime Hunter",
   "item.fguns.sniper_ammo": "Sniper Ammo",
   "item.fguns.triforce": "§6Arcix §rTriforce",
+  "item.fguns.flame_flash": "§6Arcix §rFlameFlash",
   "item.fguns.volt": "§6Xilian §rVolt",
   "itemGroup.fguns.all": "Flytre's Gun Mod",
   "key.fguns.mode": "Switch Firing Pattern",
@@ -43,5 +44,6 @@
   "text.fguns.tooltip.dropoff": "§7Dropoff: %s%% per block",
   "text.fguns.tooltip.dropoff.increase": "§7Damage Increase: %s%% per block",
   "text.fguns.tooltip.range": "§7Range: %s blocks",
-  "text.fguns.tooltip.rps": "§7RPS: %s"
+  "text.fguns.tooltip.rps": "§7RPS: %s",
+  "recipe.fguns.workbench": "Workbench"
 }

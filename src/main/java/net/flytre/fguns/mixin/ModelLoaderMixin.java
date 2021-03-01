@@ -1,7 +1,7 @@
 package net.flytre.fguns.mixin;
 
 import net.flytre.fguns.config.CustomGunConfigHandler;
-import net.flytre.fguns.guns.GunItem;
+import net.flytre.fguns.gun.AbstractGun;
 import net.minecraft.client.render.model.ModelLoader;
 import net.minecraft.client.render.model.UnbakedModel;
 import net.minecraft.client.util.ModelIdentifier;
@@ -41,8 +41,8 @@ public abstract class ModelLoaderMixin {
     @Inject(method = "getOrLoadModel", at = @At("HEAD"), cancellable = true)
     public void fguns$overrideModelForCustomGuns(Identifier id, CallbackInfoReturnable<UnbakedModel> cir) {
         if (id.getNamespace().equals("fguns") && CustomGunConfigHandler.LOADED_GUNS.containsKey(id.getPath())) {
-            for (GunItem item : GunItem.GUNS) {
-                if (item.getType() == CustomGunConfigHandler.LOADED_GUNS.get(id.getPath()).getType() && !CustomGunConfigHandler.CONFIG_ADDED_GUNS.contains(item)) {
+            for (AbstractGun item : AbstractGun.GUNS) {
+                if (item.getBulletProperties() == CustomGunConfigHandler.LOADED_GUNS.get(id.getPath()).getBulletProperties() && !CustomGunConfigHandler.CONFIG_ADDED_GUNS.contains(item)) {
                     Identifier id2 = Registry.ITEM.getId(item);
                     if (id instanceof ModelIdentifier) {
                         ModelIdentifier id3 = new ModelIdentifier(id2, ((ModelIdentifier) id).getVariant());

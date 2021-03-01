@@ -1,7 +1,8 @@
-package net.flytre.fguns.guns;
+package net.flytre.fguns.gun;
 
 import net.flytre.fguns.BulletDamageSource;
 import net.flytre.fguns.FlytreGuns;
+import net.flytre.fguns.Sounds;
 import net.flytre.fguns.entity.Bullet;
 import net.flytre.flytre_lib.common.util.ParticleUtils;
 import net.minecraft.block.Blocks;
@@ -15,17 +16,17 @@ import net.minecraft.item.Item;
 import net.minecraft.particle.BlockStateParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Hand;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Shocker extends GunItem {
-    public Shocker(double damage, double armorPen, double rps, double dropoff, int spray, int range, int clipSize, double reloadTime) {
-        super(damage, armorPen, rps, dropoff, spray, range, clipSize, reloadTime, GunType.SHOCKER);
+public class Shocker extends AbstractGun {
+
+    protected Shocker(double damage, double armorPen, double rps, double dropoff, int spray, int range, int clipSize, double reloadTime, BulletProperties bulletProperties, boolean scope, double scopeZoom, SoundEvent fireSound, Item ammoItem, double recoilMultiplier) {
+        super(damage, armorPen, rps, dropoff, spray, range, clipSize, reloadTime, bulletProperties, scope, scopeZoom, fireSound, ammoItem, recoilMultiplier);
     }
 
     public static void chain(Bullet bullet, EntityHitResult entityHitResult, float damage) {
@@ -65,6 +66,9 @@ public class Shocker extends GunItem {
         TargetPredicate predicate = new TargetPredicate();
         Entity owner = bullet.getOwner();
 
+        if (owner == null)
+            return null;
+
         if (!(owner instanceof HostileEntity))
             predicate.setPredicate(i -> !(hit.contains(i)) && !(i == bullet.getOwner()) && !(i instanceof PassiveEntity) && !(i instanceof GolemEntity));
         else
@@ -74,13 +78,19 @@ public class Shocker extends GunItem {
     }
 
 
-    public Item getAmmoItem() {
-        return FlytreGuns.ENERGY_CELL;
-    }
+    public static class Builder extends AbstractGun.Builder<Shocker> {
 
-    @Override
-    public void bulletSetup(World world, LivingEntity user, Hand hand, Bullet bullet) {
-        bullet.setProperties(GunType.SHOCKER);
-//        bullet.setVelocity(bullet.getVelocity().multiply(4));
+        public Builder() {
+            super();
+            bulletProperties = BulletProperties.SHOCKER;
+            fireSound = Sounds.SHOCKER_FIRE_EVENT;
+            ammoItem = FlytreGuns.ENERGY_CELL;
+        }
+
+        @Override
+        public Shocker build() {
+            return new Shocker(damage, armorPen, rps, dropoff, spray, range, clipSize, reloadTime, bulletProperties, scope, scopeZoom, fireSound, ammoItem, recoilMultiplier);
+        }
     }
 }
+

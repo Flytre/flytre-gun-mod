@@ -21,18 +21,21 @@
     "main": [
       "net.flytre.fguns.FlytreGuns"
     ],
-    "client" : [
+    "client": [
       "net.flytre.fguns.FlytreGunsClient"
+    ],
+    "rei_plugins": [
+      "net.flytre.fguns.compat.rei.FgunsPlugin"
     ]
   },
   "mixins": [
     "fguns.mixins.json"
   ],
-
+  "accessWidener": "fguns.accessWidener",
   "depends": {
     "fabricloader": ">=0.7.4",
     "fabric": "*",
     "minecraft": "1.16.x",
-    "flytre_lib": ">=0.2.5"
+    "flytre_lib": ">=0.2.9"
   }
 }

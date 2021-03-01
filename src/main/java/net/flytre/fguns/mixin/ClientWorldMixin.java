@@ -1,8 +1,7 @@
 package net.flytre.fguns.mixin;
 
 import net.flytre.fguns.MixinHelper;
-import net.flytre.fguns.guns.GunItem;
-import net.flytre.fguns.guns.GunType;
+import net.flytre.fguns.gun.AbstractGun;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.item.Item;
@@ -23,11 +22,10 @@ public class ClientWorldMixin {
             return;
 
         Item item = mc.player.getMainHandStack().getItem();
-        if (item instanceof GunItem && mc.player.isSneaking()) {
-            GunType type = ((GunItem) item).getType();
-            if (type != GunType.PISTOL && type != GunType.MINIGUN && type != GunType.SLIME) {
+        if (item instanceof AbstractGun && mc.player.isSneaking()) {
+            if (((AbstractGun) item).hasScope()) {
                 MixinHelper.shiftTime++;
-                MixinHelper.gun = (GunItem) item;
+                MixinHelper.gun = (AbstractGun) item;
             }
         } else
             MixinHelper.shiftTime = 0;

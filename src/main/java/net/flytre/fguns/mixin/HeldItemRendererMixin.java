@@ -3,7 +3,7 @@ package net.flytre.fguns.mixin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.flytre.fguns.FlytreGuns;
-import net.flytre.fguns.guns.GunItem;
+import net.flytre.fguns.gun.AbstractGun;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -58,11 +58,11 @@ public abstract class HeldItemRendererMixin {
         ItemStack itemStack = clientPlayerEntity.getMainHandStack();
         ItemStack itemStack2 = clientPlayerEntity.getOffHandStack();
 
-        if (this.mainHand.getItem() instanceof GunItem && itemStack.getItem() instanceof GunItem && ItemStack.areItemsEqualIgnoreDamage(mainHand, itemStack)) {
+        if (this.mainHand.getItem() instanceof AbstractGun && itemStack.getItem() instanceof AbstractGun && ItemStack.areItemsEqualIgnoreDamage(mainHand, itemStack)) {
             this.equipProgressMainHand = 1;
         }
 
-        if (this.offHand.getItem() instanceof GunItem && itemStack2.getItem() instanceof GunItem && ItemStack.areItemsEqualIgnoreDamage(offHand, itemStack2)) {
+        if (this.offHand.getItem() instanceof AbstractGun && itemStack2.getItem() instanceof AbstractGun && ItemStack.areItemsEqualIgnoreDamage(offHand, itemStack2)) {
             this.equipProgressOffHand = 1;
         }
 

@@ -1,9 +1,9 @@
 package net.flytre.fguns;
 
-import net.flytre.fguns.guns.GunItem;
+import net.flytre.fguns.gun.AbstractGun;
 
 public class MixinHelper {
 
-    public static GunItem gun = null;
+    public static AbstractGun gun = null;
     public static int shiftTime = 0;
 }

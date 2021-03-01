@@ -2,7 +2,7 @@ package net.flytre.fguns.entity;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.flytre.fguns.guns.GunItem;
+import net.flytre.fguns.gun.AbstractGun;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.feature.FeatureRenderer;
@@ -33,10 +33,10 @@ public class HeldGunFeatureRenderer<T extends LivingEntity, M extends EntityMode
                 matrixStack.scale(0.5F, 0.5F, 0.5F);
             }
 
-            if (itemStack2.getItem() instanceof GunItem)
+            if (itemStack2.getItem() instanceof AbstractGun)
                 this.renderItem(livingEntity, itemStack2, ModelTransformation.Mode.THIRD_PERSON_RIGHT_HAND, Arm.RIGHT, matrixStack, vertexConsumerProvider, i);
 
-            if (itemStack.getItem() instanceof GunItem)
+            if (itemStack.getItem() instanceof AbstractGun)
                 this.renderItem(livingEntity, itemStack, ModelTransformation.Mode.THIRD_PERSON_LEFT_HAND, Arm.LEFT, matrixStack, vertexConsumerProvider, i);
             matrixStack.pop();
         }

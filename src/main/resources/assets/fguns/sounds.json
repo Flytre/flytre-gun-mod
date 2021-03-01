@@ -133,5 +133,13 @@
         "weight": 1000000
       }
     ]
+  },
+  "flare.burn": {
+    "sounds": [
+      {
+        "name": "fguns:flare/burn",
+        "weight": 1
+      }
+    ]
   }
 }

@@ -50,6 +50,8 @@ public class ClientPlayNetworkHandlerMixin {
 
     @Inject(method = "onVelocityUpdate", at = @At("HEAD"), cancellable = true)
     public void fguns$onVelocityUpdate(EntityVelocityUpdateS2CPacket packet, CallbackInfo ci) {
+        if (world == null)
+            return;
         Entity entity = this.world.getEntityById(packet.getId());
         if (entity instanceof Bullet)
             ci.cancel();

@@ -1,4 +1,4 @@
-package net.flytre.fguns.guns;
+package net.flytre.fguns.gun;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -6,6 +6,7 @@ import net.flytre.fguns.FlytreGuns;
 import net.flytre.fguns.Sounds;
 import net.flytre.fguns.config.Config;
 import net.flytre.fguns.entity.Bullet;
+import net.flytre.flytre_lib.common.util.InventoryUtils;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -26,24 +27,34 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
-public class GunItem extends Item {
+public abstract class AbstractGun extends Item {
 
-    public static final List<GunItem> GUNS = new ArrayList<>();
-    private final double damage; //Base damage
-    private final double armorPen; //Armor Penetration, eg 0.75 ignores 75% of armor
-    private final double rps; //Rounds per second, eg 2 would fire a bullet every 10 ticks
-    private final double dropoff; //Damage dropoff every block, %, eg 0.01 would be 1% less damage/block
-    private final int spray; //Accuracy of the weapon, high spray = inaccurate
-    private final int range; //range of the weapon, abstract value
+    public static final List<AbstractGun> GUNS = new ArrayList<>();
+    private final double damage;
+    private final double armorPen;
+    private final double rps;
+    private final double dropoff;
+    private final int spray;
+    private final int range;
     private final int clipSize;
     private final double reloadTime;
-    private final GunType gunType;
+    private final BulletProperties bulletProperties;
+    private final boolean scope;
+    private final double scopeZoom;
+    private final SoundEvent fireSound;
+    private final Item ammoItem;
+    private final double recoilMultiplier;
     private String name;
 
-    public GunItem(double damage, double armorPen, double rps, double dropoff, int spray, int range, int clipSize, double reloadTime, GunType gunType) {
-        super(new Item.Settings().maxCount(1).group(FlytreGuns.TAB));
+
+    protected AbstractGun(double damage, double armorPen, double rps, double dropoff, int spray, int range, int clipSize, double reloadTime, BulletProperties bulletProperties, boolean scope, double scopeZoom, SoundEvent fireSound, Item ammoItem, double recoilMultiplier) {
+
+        super(new Settings().maxCount(1).group(FlytreGuns.TAB));
         this.damage = damage;
         this.armorPen = armorPen;
         this.rps = rps;
@@ -52,44 +63,32 @@ public class GunItem extends Item {
         this.range = range;
         this.clipSize = clipSize;
         this.reloadTime = reloadTime;
-        this.gunType = gunType;
-        this.name = null;
-        GUNS.add(this);
+        this.bulletProperties = bulletProperties;
+        this.scope = scope;
+        this.scopeZoom = scopeZoom;
+        this.fireSound = fireSound;
+        this.ammoItem = ammoItem;
+        this.recoilMultiplier = recoilMultiplier;
     }
 
-    public static GunItem randomGun() {
+    public static AbstractGun randomGun() {
         int size = GUNS.size();
-        int item = new Random().nextInt(size); // In real life, the Random object should be rather more shared than this
+        int item = RANDOM.nextInt(size); // In real life, the Random object should be rather more shared than this
         return GUNS.get(item);
-    }
-
-    //Has ammo
-    public static boolean hasAmmo(Item ammo, PlayerEntity playerEntity) {
-        if (!playerEntity.isCreative()) {
-            for (ItemStack item : playerEntity.inventory.main) {
-                if (!item.isEmpty() && item.getItem() == ammo) {
-                    return true;
-                }
-            }
-        }
-        return playerEntity.isCreative();
     }
 
     public static void attemptEarlyReload(PlayerEntity player) {
 
-        //get the gun
-        ItemStack stack = player.getOffHandStack();
-        if (!(stack.getItem() instanceof GunItem))
-            stack = player.getMainHandStack();
 
-        if (!(stack.getItem() instanceof GunItem))
+        ItemStack stack = InventoryUtils.getHoldingStack(player, i -> i.getItem() instanceof AbstractGun);
+        if (stack == null)
             return;
-        GunItem gun = (GunItem) stack.getItem();
+        AbstractGun gun = (AbstractGun) stack.getItem();
 
 
         GunNBTSerializer serializer = new GunNBTSerializer(stack.getOrCreateTag(), gun);
         //reload!
-        if (hasAmmo(gun.getAmmoItem(), player) && serializer.clip != gun.getClipSize()) {
+        if (gun.hasAmmo(player) && serializer.clip != gun.getClipSize()) {
             serializer.reload = (int) (gun.getReloadTime() * 20);
             serializer.partialClip = serializer.clip;
             serializer.clip = 0;
@@ -100,26 +99,23 @@ public class GunItem extends Item {
 
     public static void switchFiringPattern(ServerPlayerEntity player) {
         //get the gun
-        ItemStack stack = player.getOffHandStack();
-        if (!(stack.getItem() instanceof GunItem))
-            stack = player.getMainHandStack();
-
-        if (!(stack.getItem() instanceof GunItem))
+        ItemStack stack = InventoryUtils.getHoldingStack(player, i -> i.getItem() instanceof AbstractGun);
+        if (stack == null)
             return;
-        GunItem gun = (GunItem) stack.getItem();
+        AbstractGun gun = (AbstractGun) stack.getItem();
 
         GunNBTSerializer serializer = new GunNBTSerializer(stack.getOrCreateTag(), gun);
         serializer.mode = gun.getNextMode(serializer.mode);
         serializer.toTag(stack.getOrCreateTag());
     }
 
-    public static GunItem getEquippedGun() {
-        List<GunItem> tier0 = Arrays.asList(FlytreGuns.LASER_SPEED, FlytreGuns.LETHAL_MARK);
-        List<GunItem> tier1 = Arrays.asList(FlytreGuns.BEAMER, FlytreGuns.SLIMER);
-        List<GunItem> tier2 = Collections.singletonList(FlytreGuns.SEEKER);
-        List<GunItem> tier3 = Arrays.asList(FlytreGuns.NIGHTMARE, FlytreGuns.TRIFORCE);
-        List<GunItem> tier4 = Arrays.asList(FlytreGuns.SHOTGUN, FlytreGuns.BLASTER, FlytreGuns.RAPIDSTRIKE);
-        List<GunItem> tier5 = Arrays.asList(FlytreGuns.HUNTER, FlytreGuns.ROCKET_LAUNCHER, FlytreGuns.VOLT, FlytreGuns.MINIGUN);
+    public static AbstractGun getRandomEquipmentGun() {
+        List<AbstractGun> tier0 = Arrays.asList(FlytreGuns.LASER_SPEED, FlytreGuns.LETHAL_MARK);
+        List<AbstractGun> tier1 = Arrays.asList(FlytreGuns.BEAMER, FlytreGuns.SLIMER);
+        List<AbstractGun> tier2 = Collections.singletonList(FlytreGuns.SEEKER);
+        List<AbstractGun> tier3 = Arrays.asList(FlytreGuns.NIGHTMARE, FlytreGuns.TRIFORCE);
+        List<AbstractGun> tier4 = Arrays.asList(FlytreGuns.SHOTGUN, FlytreGuns.BLASTER, FlytreGuns.RAPIDSTRIKE);
+        List<AbstractGun> tier5 = Arrays.asList(FlytreGuns.HUNTER, FlytreGuns.ROCKET_LAUNCHER, FlytreGuns.VOLT, FlytreGuns.MINIGUN);
         double r = Math.random();
         if (r > FlytreGuns.CONFIG_HANDLER.getConfig().getMobGunSpawnChance())
             return null;
@@ -145,10 +141,6 @@ public class GunItem extends Item {
         return current + 1 > 2 ? 0 : 2;
     }
 
-    public GunType getType() {
-        return gunType;
-    }
-
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
 
@@ -164,8 +156,8 @@ public class GunItem extends Item {
                 double ammoCalc = (double) getClipSize() / ((int) (getReloadTime() * 20));
                 ammoCalc *= (int) (getReloadTime() * 20) - serializer.reload;
                 while (serializer.partialClip < Math.floor(ammoCalc)) {
-                    if (hasAmmo(getAmmoItem(), player)) {
-                        removeAmmo(getAmmoItem(), player);
+                    if (hasAmmo(player)) {
+                        removeAmmo(player);
                         serializer.partialClip++;
                     } else {
                         serializer.clip = serializer.partialClip;
@@ -182,7 +174,7 @@ public class GunItem extends Item {
                 serializer.partialClip = 0;
             } else if (serializer.reload != -1) {
                 serializer.reload--;
-            } else if (hasAmmo(getAmmoItem(), player) && serializer.clip < getClipSize()) {
+            } else if (hasAmmo(player) && serializer.clip < getClipSize()) {
                 serializer.reload = (int) (getReloadTime() * 20);
                 serializer.partialClip = serializer.clip;
                 serializer.clip = 0;
@@ -250,65 +242,20 @@ public class GunItem extends Item {
     }
 
     public void playSound(World world, LivingEntity user) {
-
-        SoundEvent event;
-        switch (getType()) {
-            case SNIPER:
-                event = Sounds.SNIPER_FIRE_EVENT;
-                break;
-            case RIFLE:
-            case SMG:
-            case MINIGUN:
-                event = Sounds.RIFLE_FIRE_EVENT;
-                break;
-            case SHOTGUN:
-                event = Sounds.SHOTGUN_FIRE_EVENT;
-                break;
-            case SLIME:
-                event = Sounds.SLIME_FIRE_EVENT;
-                break;
-            case ROCKET:
-                event = Sounds.ROCKET_FIRE_EVENT;
-                break;
-            case SHOCKER:
-                event = Sounds.SHOCKER_FIRE_EVENT;
-                break;
-            default:
-                event = Sounds.PISTOL_FIRE_EVENT;
-        }
-
         world.playSound(
                 null,
                 user.getBlockPos(),
-                event,
+                getFireSound(),
                 SoundCategory.PLAYERS,
                 1f,
                 1f
         );
     }
 
-    public Item getAmmoItem() {
-        Item ammo;
-        switch (getType()) {
-            case SNIPER:
-                ammo = FlytreGuns.SNIPER_AMMO;
-                break;
-            case SHOTGUN:
-                ammo = FlytreGuns.SHOTGUN_SHELL;
-                break;
-            case ROCKET:
-                ammo = FlytreGuns.ROCKET_AMMO;
-                break;
-            default:
-                ammo = FlytreGuns.BASIC_AMMO;
-        }
-        return ammo;
-    }
-
-    protected void removeAmmo(Item ammo, PlayerEntity playerEntity) {
+    protected void removeAmmo(PlayerEntity playerEntity) {
         if (!playerEntity.isCreative()) {
             for (ItemStack item : playerEntity.inventory.main) {
-                if (item.getItem() == ammo) {
+                if (item.getItem() == ammoItem) {
                     item.decrement(1);
                     break;
                 }
@@ -316,20 +263,24 @@ public class GunItem extends Item {
         }
     }
 
-    //Override for custom behavior
     public void fireBullet(World world, LivingEntity user, Hand hand, @Nullable LivingEntity target, boolean semi) {
         Bullet bulletEntity = new Bullet(user, world);
         bulletEntity.setPos(user.getX(), user.getEyeY(), user.getZ());
         setBulletVector(bulletEntity, user, target, semi);
         bulletEntity.setInitialPos(new Vec3d(user.getX(), user.getEyeY(), user.getZ()));
         Config config = FlytreGuns.CONFIG_HANDLER.getConfig();
+
+        Vec3d vel = getRotationVector(user.pitch, user.yaw).multiply(-0.1 * recoilMultiplier, -0.07 * recoilMultiplier, -0.1 * recoilMultiplier);
+        user.addVelocity(vel.x, vel.y, vel.z);
+        user.velocityModified = true;
         bulletEntity.setProperties(user instanceof PlayerEntity ? damage * config.getPlayerDamageModifier() : damage * config.getEntityDamageModifier(), armorPen, dropoff, range);
         bulletSetup(world, user, hand, bulletEntity);
         world.spawnEntity(bulletEntity);
     }
 
     public void bulletSetup(World world, LivingEntity user, Hand hand, Bullet bullet) {
-
+        if (getBulletProperties() != BulletProperties.NONE)
+            bullet.setProperties(getBulletProperties());
     }
 
     public double getDamage() {
@@ -364,22 +315,73 @@ public class GunItem extends Item {
         return reloadTime;
     }
 
+    public BulletProperties getBulletProperties() {
+        return bulletProperties;
+    }
+
+    public boolean hasScope() {
+        return scope;
+    }
+
+    public double getScopeZoom() {
+        return scopeZoom;
+    }
+
+    public SoundEvent getFireSound() {
+        return fireSound;
+    }
+
+    public Item getAmmoItem() {
+        return ammoItem;
+    }
+
+    public double getRecoilMultiplier() {
+        return recoilMultiplier;
+    }
+
+    @Environment(EnvType.CLIENT)
+    public Text getName() {
+        return new TranslatableText(name == null ? this.getTranslationKey() : name);
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    protected String getOrCreateTranslationKey() {
+        if (name != null)
+            return name;
+        return super.getOrCreateTranslationKey();
+    }
+
+    public boolean hasAmmo(PlayerEntity player) {
+        if (!player.isCreative()) {
+            for (ItemStack item : player.inventory.main) {
+                if (!item.isEmpty() && item.getItem() == ammoItem) {
+                    return true;
+                }
+            }
+        }
+        return player.isCreative();
+    }
+
     public int getEffectiveSpray(LivingEntity user) {
         return spray;
     }
 
+
     public void setBulletVector(Bullet bullet, LivingEntity user, LivingEntity target, boolean semi) {
         float tSpray = getEffectiveSpray(user);
-        if (semi) {
+        if (semi)
             tSpray *= 2.0 / 3.0;
-        }
+
         if (user.isSneaking())
             tSpray = Math.max(0, Math.min((tSpray * 2) / 5, tSpray - 5));
         if (user instanceof PlayerEntity)
             bullet.setVelocity(getRotationVector((float) (user.pitch + getSprayModifier(user, tSpray)), (float) (user.yaw + getSprayModifier(user, tSpray))).multiply(5));
         else {
             double d = target.getX() - user.getX();
-            double e = target.getBodyY(0.3333333333333333D) - bullet.getY();
+            double e = target.getBodyY(0.33333D) - bullet.getY();
             double f = target.getZ() - user.getZ();
             double g = MathHelper.sqrt(d * d + f * f);
             bullet.setVelocity(d, e + g * 0.03D, f, 3.0F, tSpray);
@@ -401,32 +403,19 @@ public class GunItem extends Item {
     }
 
     @Environment(EnvType.CLIENT)
-    public Text getName() {
-        return new TranslatableText(name == null ? this.getTranslationKey() : name);
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    protected String getOrCreateTranslationKey() {
-        if (name != null)
-            return name;
-        return super.getOrCreateTranslationKey();
+    public Text getDamageLine() {
+        return new TranslatableText("text.fguns.tooltip.damage", String.format("%.1f", getDamage()));
     }
 
     @Override
     public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
 
-        if (!(stack.getItem() instanceof GunItem))
+        if (!(stack.getItem() instanceof AbstractGun))
             return;
 
-        GunItem g = (GunItem) stack.getItem();
+        AbstractGun g = (AbstractGun) stack.getItem();
 
-        tooltip.add(g.gunType == GunType.ROCKET ?
-                new TranslatableText("text.fguns.tooltip.damage.varies") :
-                new TranslatableText(g.gunType == GunType.SHOTGUN ? "text.fguns.tooltip.damage.shotgun" : "text.fguns.tooltip.damage", String.format("%.1f", g.getDamage()))
-        );
+        tooltip.add(getDamageLine());
 
         int fireSpeed = (20 / (int) (20 / g.getRps()));
         tooltip.add(new TranslatableText("text.fguns.tooltip.rps", fireSpeed == 0 ? String.format("%.1f", g.getRps()) : fireSpeed));
@@ -447,14 +436,11 @@ public class GunItem extends Item {
         super.appendTooltip(stack, world, tooltip, context);
     }
 
+
     @Environment(EnvType.CLIENT)
     public List<Text> sidebarInfo() {
         List<Text> result = new ArrayList<>();
-
-        result.add(gunType == GunType.ROCKET ?
-                new TranslatableText("text.fguns.tooltip.damage.varies") :
-                new TranslatableText(gunType == GunType.SHOTGUN ? "text.fguns.tooltip.damage.shotgun" : "text.fguns.tooltip.damage", String.format("%.1f", getDamage()))
-        );
+        result.add(getDamageLine());
 
         int fireSpeed = (20 / (int) (20 / getRps()));
         result.add(new TranslatableText("text.fguns.tooltip.rps", fireSpeed == 0 ? String.format("%.1f", getRps()) : fireSpeed));
@@ -474,7 +460,6 @@ public class GunItem extends Item {
         return result;
     }
 
-
     public static class GunNBTSerializer {
         public int clip;
         public int mode;
@@ -482,8 +467,8 @@ public class GunItem extends Item {
         public int partialClip;
         public int cooldown;
 
-        public GunNBTSerializer(CompoundTag tag, GunItem gunItem) {
-            this.clip = tag.contains("clip") ? tag.getInt("clip") : gunItem.getClipSize();
+        public GunNBTSerializer(CompoundTag tag, AbstractGun gun) {
+            this.clip = tag.contains("clip") ? tag.getInt("clip") : gun.getClipSize();
             this.reload = tag.contains("reload") ? tag.getInt("reload") : -1;
             this.cooldown = tag.contains("cooldown") ? tag.getInt("cooldown") : 0;
             this.mode = tag.contains("mode") ? tag.getInt("mode") : 0;
@@ -500,4 +485,92 @@ public class GunItem extends Item {
         }
     }
 
+
+    public abstract static class Builder<T extends AbstractGun> {
+        protected BulletProperties bulletProperties;
+        protected double damage = 1.0;
+        protected double armorPen = 0;
+        protected double rps = 1;
+        protected double dropoff = 0;
+        protected int spray = 0;
+        protected int range = 30;
+        protected int clipSize = 10;
+        protected double reloadTime = 1.0;
+        protected boolean scope = true;
+        protected double scopeZoom = 5;
+        protected double recoilMultiplier = 1;
+        protected SoundEvent fireSound = Sounds.PISTOL_FIRE_EVENT;
+        protected Item ammoItem = FlytreGuns.BASIC_AMMO;
+
+        public Builder() {
+            this.bulletProperties = BulletProperties.NONE;
+        }
+
+        public Builder<T> setDamage(double damage) {
+            this.damage = damage;
+            return this;
+        }
+
+        public Builder<T> setArmorPen(double armorPen) {
+            this.armorPen = armorPen;
+            return this;
+        }
+
+        public Builder<T> setRps(double rps) {
+            this.rps = rps;
+            return this;
+        }
+
+        public Builder<T> setDropoff(double dropoff) {
+            this.dropoff = dropoff;
+            return this;
+        }
+
+        public Builder<T> setSpray(int spray) {
+            this.spray = spray;
+            return this;
+        }
+
+        public Builder<T> setRange(int range) {
+            this.range = range;
+            return this;
+        }
+
+        public Builder<T> setClipSize(int clipSize) {
+            this.clipSize = clipSize;
+            return this;
+        }
+
+        public Builder<T> setReloadTime(double reloadTime) {
+            this.reloadTime = reloadTime;
+            return this;
+        }
+
+        public Builder<T> setScope(boolean scope) {
+            this.scope = scope;
+            return this;
+        }
+
+        public Builder<T> setScopeZoom(double scopeZoom) {
+            this.scopeZoom = scopeZoom;
+            return this;
+        }
+
+        public Builder<T> setFireSound(SoundEvent fireSound) {
+            this.fireSound = fireSound;
+            return this;
+        }
+
+        public Builder<T> setAmmoItem(Item ammoItem) {
+            this.ammoItem = ammoItem;
+            return this;
+        }
+
+        public Builder<T> setRecoilMultiplier(double recoilMultiplier) {
+            this.recoilMultiplier = recoilMultiplier;
+            return this;
+        }
+
+        public abstract T build();
+    }
 }

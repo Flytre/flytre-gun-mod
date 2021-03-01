@@ -3,7 +3,7 @@ package net.flytre.fguns.mixin;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.flytre.fguns.guns.GunItem;
+import net.flytre.fguns.gun.AbstractGun;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
@@ -31,9 +31,9 @@ public abstract class ItemRendererMixin {
 
         Item item = stack.getItem();
 
-        if (item instanceof GunItem) {
+        if (item instanceof AbstractGun) {
 
-            GunItem gun = (GunItem) item;
+            AbstractGun gun = (AbstractGun) item;
             CompoundTag tag = stack.getOrCreateTag();
 
             int clip = tag.contains("clip") ? tag.getInt("clip") : -1;

@@ -3,7 +3,7 @@ package net.flytre.fguns;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
-import net.flytre.fguns.guns.GunItem;
+import net.flytre.fguns.gun.AbstractGun;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawableHelper;
@@ -49,13 +49,13 @@ public class HUD {
             return;
 
         ItemStack stack = player.getOffHandStack();
-        if (!(stack.getItem() instanceof GunItem))
+        if (!(stack.getItem() instanceof AbstractGun))
             stack = player.getMainHandStack();
 
-        if (!(stack.getItem() instanceof GunItem))
+        if (!(stack.getItem() instanceof AbstractGun))
             return;
 
-        GunItem gun = (GunItem) stack.getItem();
+        AbstractGun gun = (AbstractGun) stack.getItem();
 
         int max = gun.getClipSize();
         CompoundTag tag = stack.getOrCreateTag();
