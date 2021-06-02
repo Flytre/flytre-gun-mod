@@ -16,6 +16,8 @@ public class WorkbenchRecipeDisplay extends AbstractRecipeDisplay<WorkbenchRecip
         super(recipe);
     }
 
+
+    //SHOULD BE List<EntryIngredient>
     @Override
     public List<List<EntryStack>> createOutputs() {
         return Collections.singletonList(Collections.singletonList(EntryStack.create(recipe.getOutput())));
