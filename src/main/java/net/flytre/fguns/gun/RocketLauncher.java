@@ -14,10 +14,9 @@ import net.minecraft.world.World;
 public class RocketLauncher extends AbstractGun {
 
 
-    protected RocketLauncher(double damage, double armorPen, double rps, double dropoff, int spray, int range, int clipSize, double reloadTime, BulletProperties bulletProperties, boolean scope, double scopeZoom, SoundEvent fireSound, Item ammoItem, double recoilMultiplier) {
-        super(damage, armorPen, rps, dropoff, spray, range, clipSize, reloadTime, bulletProperties, scope, scopeZoom, fireSound, ammoItem, recoilMultiplier);
+    protected RocketLauncher(double damage, double armorPen, double rps, double dropoff, int spray, int range, int clipSize, double reloadTime, BulletProperties bulletProperties, boolean scope, double scopeZoom, SoundEvent fireSound, Item ammoItem, double horizontalRecoil, double verticalRecoil) {
+        super(damage, armorPen, rps, dropoff, spray, range, clipSize, reloadTime, bulletProperties, scope, scopeZoom, fireSound, ammoItem, horizontalRecoil, verticalRecoil);
     }
-
 
     @Override
     public Text getDamageLine() {
@@ -39,13 +38,13 @@ public class RocketLauncher extends AbstractGun {
             damage = 1;
             armorPen = 100;
             dropoff = 0;
-            recoilMultiplier = 2.2;
+            horizontalRecoil = 2.2;
             this.scope = false;
         }
 
         @Override
         public RocketLauncher build() {
-            return new RocketLauncher(damage, armorPen, rps, dropoff, spray, range, clipSize, reloadTime, bulletProperties, scope, scopeZoom, fireSound, ammoItem, recoilMultiplier);
+            return new RocketLauncher(damage, armorPen, rps, dropoff, spray, range, clipSize, reloadTime, bulletProperties, scope, scopeZoom, fireSound, ammoItem, horizontalRecoil, verticalRecoil);
         }
     }
 }

@@ -1,5 +1,6 @@
 package net.flytre.fguns.gun;
 
+import com.google.gson.annotations.SerializedName;
 import net.flytre.fguns.FlytreGuns;
 import net.flytre.fguns.Sounds;
 import net.minecraft.entity.LivingEntity;
@@ -14,8 +15,8 @@ public class Shotgun extends AbstractGun {
 
     private final int pelletCount;
 
-    protected Shotgun(double damage, double armorPen, double rps, double dropoff, int spray, int range, int clipSize, double reloadTime, BulletProperties bulletProperties, boolean scope, double scopeZoom, SoundEvent fireSound, Item ammoItem, int pelletCount, double recoilMultiplier) {
-        super(damage, armorPen, rps, dropoff, spray, range, clipSize, reloadTime, bulletProperties, scope, scopeZoom, fireSound, ammoItem, recoilMultiplier);
+    protected Shotgun(double damage, double armorPen, double rps, double dropoff, int spray, int range, int clipSize, double reloadTime, BulletProperties bulletProperties, boolean scope, double scopeZoom, SoundEvent fireSound, Item ammoItem, int pelletCount, double horizontalRecoil, double verticalRecoil) {
+        super(damage, armorPen, rps, dropoff, spray, range, clipSize, reloadTime, bulletProperties, scope, scopeZoom, fireSound, ammoItem, horizontalRecoil, verticalRecoil);
         this.pelletCount = pelletCount;
     }
 
@@ -38,6 +39,7 @@ public class Shotgun extends AbstractGun {
 
     public static class Builder extends AbstractGun.Builder<Shotgun> {
 
+        @SerializedName("pellet_count")
         protected int pelletCount = 5;
 
         public Builder() {
@@ -46,7 +48,7 @@ public class Shotgun extends AbstractGun {
             this.ammoItem = FlytreGuns.SHOTGUN_SHELL;
             this.fireSound = Sounds.SHOTGUN_FIRE_EVENT;
             this.scope = false;
-            this.recoilMultiplier = 1.4;
+            this.horizontalRecoil = 1.4;
         }
 
         public void setPelletCount(int pelletCount) {
@@ -55,7 +57,7 @@ public class Shotgun extends AbstractGun {
 
         @Override
         public Shotgun build() {
-            return new Shotgun(damage, armorPen, rps, dropoff, spray, range, clipSize, reloadTime, bulletProperties, scope, scopeZoom, fireSound, ammoItem, pelletCount, recoilMultiplier);
+            return new Shotgun(damage, armorPen, rps, dropoff, spray, range, clipSize, reloadTime, bulletProperties, scope, scopeZoom, fireSound, ammoItem, pelletCount, horizontalRecoil, verticalRecoil);
         }
     }
 }

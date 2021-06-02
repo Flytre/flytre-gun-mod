@@ -1,5 +1,6 @@
 package net.flytre.fguns.gun;
 
+import com.google.gson.annotations.SerializedName;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.flytre.fguns.FlytreGuns;
@@ -48,11 +49,12 @@ public abstract class AbstractGun extends Item {
     private final double scopeZoom;
     private final SoundEvent fireSound;
     private final Item ammoItem;
-    private final double recoilMultiplier;
+    private final double horizontalRecoil;
+    private final double verticalRecoil;
     private String name;
 
 
-    protected AbstractGun(double damage, double armorPen, double rps, double dropoff, int spray, int range, int clipSize, double reloadTime, BulletProperties bulletProperties, boolean scope, double scopeZoom, SoundEvent fireSound, Item ammoItem, double recoilMultiplier) {
+    protected AbstractGun(double damage, double armorPen, double rps, double dropoff, int spray, int range, int clipSize, double reloadTime, BulletProperties bulletProperties, boolean scope, double scopeZoom, SoundEvent fireSound, Item ammoItem, double horizontalRecoil, double verticalRecoil) {
 
         super(new Settings().maxCount(1).group(FlytreGuns.TAB));
         this.damage = damage;
@@ -68,7 +70,9 @@ public abstract class AbstractGun extends Item {
         this.scopeZoom = scopeZoom;
         this.fireSound = fireSound;
         this.ammoItem = ammoItem;
-        this.recoilMultiplier = recoilMultiplier;
+        this.horizontalRecoil = horizontalRecoil;
+        this.verticalRecoil = verticalRecoil;
+        GUNS.add(this);
     }
 
     public static AbstractGun randomGun() {
@@ -185,6 +189,8 @@ public abstract class AbstractGun extends Item {
         if (serializer.cooldown > 0)
             serializer.cooldown--;
 
+        serializer.fallFlying = player.isFallFlying();
+
         serializer.toTag(stack.getOrCreateTag());
 
     }
@@ -203,6 +209,10 @@ public abstract class AbstractGun extends Item {
     public TypedActionResult<ItemStack> action(World world, LivingEntity hitman, Hand hand, LivingEntity target, boolean semi) {
 
         ItemStack stack = hitman.getStackInHand(hand);
+
+        if (hitman.isFallFlying() && hitman instanceof PlayerEntity)
+            return TypedActionResult.pass(stack);
+
         GunNBTSerializer serializer = new GunNBTSerializer(stack.getOrCreateTag(), this);
         int maxCd = (int) (20 / rps - 1);
 
@@ -266,13 +276,12 @@ public abstract class AbstractGun extends Item {
     public void fireBullet(World world, LivingEntity user, Hand hand, @Nullable LivingEntity target, boolean semi) {
         Bullet bulletEntity = new Bullet(user, world);
         bulletEntity.setPos(user.getX(), user.getEyeY(), user.getZ());
+        Vec3d vel = getRotationVector(user.pitch, user.yaw).multiply(-0.03 * horizontalRecoil, -0.023 * verticalRecoil, -0.03 * horizontalRecoil);
+        user.addVelocity(vel.x, vel.y, vel.z);
+        user.velocityModified = true;
         setBulletVector(bulletEntity, user, target, semi);
         bulletEntity.setInitialPos(new Vec3d(user.getX(), user.getEyeY(), user.getZ()));
         Config config = FlytreGuns.CONFIG_HANDLER.getConfig();
-
-        Vec3d vel = getRotationVector(user.pitch, user.yaw).multiply(-0.1 * recoilMultiplier, -0.07 * recoilMultiplier, -0.1 * recoilMultiplier);
-        user.addVelocity(vel.x, vel.y, vel.z);
-        user.velocityModified = true;
         bulletEntity.setProperties(user instanceof PlayerEntity ? damage * config.getPlayerDamageModifier() : damage * config.getEntityDamageModifier(), armorPen, dropoff, range);
         bulletSetup(world, user, hand, bulletEntity);
         world.spawnEntity(bulletEntity);
@@ -335,8 +344,12 @@ public abstract class AbstractGun extends Item {
         return ammoItem;
     }
 
-    public double getRecoilMultiplier() {
-        return recoilMultiplier;
+    public double getHorizontalRecoil() {
+        return horizontalRecoil;
+    }
+
+    public double getVerticalRecoil() {
+        return verticalRecoil;
     }
 
     @Environment(EnvType.CLIENT)
@@ -377,19 +390,18 @@ public abstract class AbstractGun extends Item {
 
         if (user.isSneaking())
             tSpray = Math.max(0, Math.min((tSpray * 2) / 5, tSpray - 5));
-        if (user instanceof PlayerEntity)
-            bullet.setVelocity(getRotationVector((float) (user.pitch + getSprayModifier(user, tSpray)), (float) (user.yaw + getSprayModifier(user, tSpray))).multiply(5));
-        else {
+        if (user instanceof PlayerEntity) {
+            float f = -MathHelper.sin(user.yaw * 0.017453292F) * MathHelper.cos(user.pitch * 0.017453292F);
+            float g = -MathHelper.sin(user.pitch * 0.017453292F);
+            float h = MathHelper.cos(user.yaw * 0.017453292F) * MathHelper.cos(user.pitch * 0.017453292F);
+            bullet.setVelocity(f, g, h, 3.0F, tSpray);
+        } else {
             double d = target.getX() - user.getX();
             double e = target.getBodyY(0.33333D) - bullet.getY();
             double f = target.getZ() - user.getZ();
             double g = MathHelper.sqrt(d * d + f * f);
             bullet.setVelocity(d, e + g * 0.03D, f, 3.0F, tSpray);
         }
-    }
-
-    private double getSprayModifier(LivingEntity user, double tSpray) {
-        return (Math.random() * (tSpray + 1)) - 1 - tSpray / 2.0;
     }
 
     protected Vec3d getRotationVector(float pitch, float yaw) {
@@ -466,6 +478,7 @@ public abstract class AbstractGun extends Item {
         public int reload;
         public int partialClip;
         public int cooldown;
+        private boolean fallFlying;
 
         public GunNBTSerializer(CompoundTag tag, AbstractGun gun) {
             this.clip = tag.contains("clip") ? tag.getInt("clip") : gun.getClipSize();
@@ -473,6 +486,11 @@ public abstract class AbstractGun extends Item {
             this.cooldown = tag.contains("cooldown") ? tag.getInt("cooldown") : 0;
             this.mode = tag.contains("mode") ? tag.getInt("mode") : 0;
             this.partialClip = tag.contains("partialClip") ? tag.getInt("partialClip") : 0;
+            this.fallFlying = tag.contains("fallFlying") && tag.getBoolean("fallFlying");
+        }
+
+        public boolean shouldRenderCustomPose() {
+            return reload != -1 || fallFlying;
         }
 
 
@@ -482,23 +500,33 @@ public abstract class AbstractGun extends Item {
             tag.putInt("cooldown", cooldown);
             tag.putInt("mode", mode);
             tag.putInt("partialClip", partialClip);
+            tag.putBoolean("fallFlying", fallFlying);
         }
     }
 
 
     public abstract static class Builder<T extends AbstractGun> {
+
+        @SerializedName("bullet_properties")
         protected BulletProperties bulletProperties;
         protected double damage = 1.0;
+        @SerializedName("armor_penetration")
         protected double armorPen = 0;
         protected double rps = 1;
         protected double dropoff = 0;
         protected int spray = 0;
         protected int range = 30;
+        @SerializedName("clip_size")
         protected int clipSize = 10;
+        @SerializedName("reload_time")
         protected double reloadTime = 1.0;
         protected boolean scope = true;
+        @SerializedName("scope_zoom")
         protected double scopeZoom = 5;
-        protected double recoilMultiplier = 1;
+        @SerializedName("horizontal_recoil")
+        protected double horizontalRecoil = 1;
+        @SerializedName("vertical_recoil")
+        protected double verticalRecoil = 0.3;
         protected SoundEvent fireSound = Sounds.PISTOL_FIRE_EVENT;
         protected Item ammoItem = FlytreGuns.BASIC_AMMO;
 
@@ -566,8 +594,13 @@ public abstract class AbstractGun extends Item {
             return this;
         }
 
-        public Builder<T> setRecoilMultiplier(double recoilMultiplier) {
-            this.recoilMultiplier = recoilMultiplier;
+        public Builder<T> setHorizontalRecoil(double horizontalRecoil) {
+            this.horizontalRecoil = horizontalRecoil;
+            return this;
+        }
+
+        public Builder<T> setVerticalRecoil(double verticalRecoil) {
+            this.verticalRecoil = verticalRecoil;
             return this;
         }
 

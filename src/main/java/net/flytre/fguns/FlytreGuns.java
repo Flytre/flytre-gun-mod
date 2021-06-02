@@ -45,7 +45,7 @@ public class FlytreGuns implements ModInitializer {
             () -> new ItemStack(FlytreGuns.LETHAL_MARK));
 
     public static final AbstractGun LETHAL_MARK = new Pistol.Builder().setDamage(5).setArmorPen(.4).setRps(2).setDropoff(0.02).setSpray(3).setRange(30).setClipSize(10).setReloadTime(1.4).build();
-    public static final AbstractGun BEAMER = new Pistol.Builder().setDamage(12).setArmorPen(.5).setRps(1).setDropoff(0.02).setSpray(3).setRange(30).setClipSize(6).setReloadTime(3.0).setScope(true).setScopeZoom(4).setRecoilMultiplier(1.4).build();
+    public static final AbstractGun BEAMER = new Pistol.Builder().setDamage(12).setArmorPen(.5).setRps(1).setDropoff(0.02).setSpray(3).setRange(30).setClipSize(6).setReloadTime(3.0).setScope(true).setScopeZoom(4).setHorizontalRecoil(1.4).build();
     public static final AbstractGun LASER_SPEED = new Pistol.Builder().setDamage(4).setArmorPen(.2).setRps(4).setDropoff(0.03).setSpray(6).setRange(25).setClipSize(20).setReloadTime(1.4).build();
 
     public static final AbstractGun HUNTER = new Rifle.Builder().setDamage(5).setArmorPen(.4).setRps(6).setDropoff(0.04).setSpray(9).setRange(25).setClipSize(25).setReloadTime(3.2).build();
@@ -82,7 +82,6 @@ public class FlytreGuns implements ModInitializer {
     //MISC
     public static ConfigHandler<Config> CONFIG_HANDLER = new ConfigHandler<>(new Config(), "flytres_gun_mod");
     public static DefaultParticleType FLARE_PARTICLES;
-    public static boolean MOB_AI_RELEASED = false;
 
     @Override
     public void onInitialize() {

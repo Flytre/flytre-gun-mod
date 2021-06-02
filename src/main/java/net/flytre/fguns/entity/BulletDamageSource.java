@@ -1,6 +1,5 @@
-package net.flytre.fguns;
+package net.flytre.fguns.entity;
 
-import net.flytre.fguns.entity.Bullet;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.EntityDamageSource;

@@ -2,6 +2,7 @@ package net.flytre.fguns.gun;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
+import com.google.gson.annotations.SerializedName;
 import net.flytre.fguns.Sounds;
 import net.flytre.fguns.entity.Bullet;
 import net.minecraft.entity.EquipmentSlot;
@@ -21,8 +22,8 @@ public class Minigun extends AbstractGun {
     private final Multimap<EntityAttribute, EntityAttributeModifier> attributeModifiers;
 
 
-    protected Minigun(double damage, double armorPen, double rps, double dropoff, int spray, int range, int clipSize, double reloadTime, BulletProperties bulletProperties, boolean scope, double scopeZoom, SoundEvent fireSound, Item ammoItem, double speedModifier, double recoilMultiplier) {
-        super(damage, armorPen, rps, dropoff, spray, range, clipSize, reloadTime, bulletProperties, scope, scopeZoom, fireSound, ammoItem, recoilMultiplier);
+    protected Minigun(double damage, double armorPen, double rps, double dropoff, int spray, int range, int clipSize, double reloadTime, BulletProperties bulletProperties, boolean scope, double scopeZoom, SoundEvent fireSound, Item ammoItem, double speedModifier, double horizontalRecoil, double verticalRecoil) {
+        super(damage, armorPen, rps, dropoff, spray, range, clipSize, reloadTime, bulletProperties, scope, scopeZoom, fireSound, ammoItem, horizontalRecoil, verticalRecoil);
         ImmutableMultimap.Builder<EntityAttribute, EntityAttributeModifier> builder = ImmutableMultimap.builder();
         builder.put(EntityAttributes.GENERIC_MOVEMENT_SPEED, new EntityAttributeModifier(UUID.fromString("CB3F88D4-645B-4A38-C198-9C13A444A5CF"), "Weight modifier", speedModifier, EntityAttributeModifier.Operation.MULTIPLY_BASE));
         this.attributeModifiers = builder.build();
@@ -41,13 +42,15 @@ public class Minigun extends AbstractGun {
 
     public static class Builder extends AbstractGun.Builder<Minigun> {
 
+        @SerializedName("speed_modifier")
         protected double speedModifier = -.25;
 
         public Builder() {
             super();
             this.fireSound = Sounds.RIFLE_FIRE_EVENT;
             this.scope = false;
-            this.recoilMultiplier = 0.7;
+            this.horizontalRecoil = 0.7;
+            this.verticalRecoil = 0.6;
         }
 
         public void setSpeedModifier(double speedModifier) {
@@ -56,7 +59,7 @@ public class Minigun extends AbstractGun {
 
         @Override
         public Minigun build() {
-            return new Minigun(damage, armorPen, rps, dropoff, spray, range, clipSize, reloadTime, bulletProperties, scope, scopeZoom, fireSound, ammoItem, speedModifier, recoilMultiplier);
+            return new Minigun(damage, armorPen, rps, dropoff, spray, range, clipSize, reloadTime, bulletProperties, scope, scopeZoom, fireSound, ammoItem, speedModifier, horizontalRecoil, verticalRecoil);
         }
     }
 }

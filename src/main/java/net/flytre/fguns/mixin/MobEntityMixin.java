@@ -1,6 +1,5 @@
 package net.flytre.fguns.mixin;
 
-import net.flytre.fguns.FlytreGuns;
 import net.flytre.fguns.gun.AbstractGun;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
@@ -44,8 +43,6 @@ public abstract class MobEntityMixin extends LivingEntity {
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "tick", at = @At("TAIL"))
     public void fguns$holdGun(CallbackInfo ci) {
-        if (!FlytreGuns.MOB_AI_RELEASED)
-            return;
 
         if (!gunAdded) {
             AbstractGun item = AbstractGun.getRandomEquipmentGun();

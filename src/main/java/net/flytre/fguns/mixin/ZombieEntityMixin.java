@@ -1,6 +1,5 @@
 package net.flytre.fguns.mixin;
 
-import net.flytre.fguns.FlytreGuns;
 import net.flytre.fguns.entity.BloodbathGoal;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.mob.HostileEntity;
@@ -21,10 +20,6 @@ public abstract class ZombieEntityMixin extends HostileEntity {
 
     @Inject(method = "initGoals", at = @At("HEAD"), cancellable = true)
     public void fguns$gunAttackType(CallbackInfo ci) {
-
-        if (!FlytreGuns.MOB_AI_RELEASED)
-            return;
-
         this.goalSelector.add(1, new BloodbathGoal(this, 1.0D));
     }
 }

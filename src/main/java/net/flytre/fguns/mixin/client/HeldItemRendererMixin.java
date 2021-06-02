@@ -1,4 +1,4 @@
-package net.flytre.fguns.mixin;
+package net.flytre.fguns.mixin.client;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -60,10 +60,12 @@ public abstract class HeldItemRendererMixin {
 
         if (this.mainHand.getItem() instanceof AbstractGun && itemStack.getItem() instanceof AbstractGun && ItemStack.areItemsEqualIgnoreDamage(mainHand, itemStack)) {
             this.equipProgressMainHand = 1;
+            this.mainHand = itemStack;
         }
 
         if (this.offHand.getItem() instanceof AbstractGun && itemStack2.getItem() instanceof AbstractGun && ItemStack.areItemsEqualIgnoreDamage(offHand, itemStack2)) {
             this.equipProgressOffHand = 1;
+            this.offHand = itemStack2;
         }
 
     }

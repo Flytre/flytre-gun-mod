@@ -1,4 +1,4 @@
-package net.flytre.fguns.mixin;
+package net.flytre.fguns.mixin.client;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
@@ -7,7 +7,13 @@ import net.flytre.fguns.gun.AbstractGun;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.item.ItemRenderer;
+import net.minecraft.client.render.model.BakedModel;
+import net.minecraft.client.render.model.json.ModelTransformation;
+import net.minecraft.client.render.model.json.Transformation;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
@@ -92,5 +98,23 @@ public abstract class ItemRendererMixin {
         RenderSystem.enableAlphaTest();
         RenderSystem.enableTexture();
         RenderSystem.enableDepthTest();
+    }
+
+
+    @Inject(method = "renderItem(Lnet/minecraft/item/ItemStack;Lnet/minecraft/client/render/model/json/ModelTransformation$Mode;ZLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;IILnet/minecraft/client/render/model/BakedModel;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/math/MatrixStack;translate(DDD)V", ordinal = 0))
+    public void fguns$reloadTransformation(ItemStack stack, ModelTransformation.Mode renderMode, boolean leftHanded, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, BakedModel model, CallbackInfo ci) {
+
+        if (stack.getItem() instanceof AbstractGun && renderMode != ModelTransformation.Mode.GUI && renderMode != ModelTransformation.Mode.GROUND) {
+            AbstractGun.GunNBTSerializer serializer = new AbstractGun.GunNBTSerializer(stack.getOrCreateTag(), (AbstractGun) stack.getItem());
+            if (serializer.shouldRenderCustomPose()) {
+                Transformation transformation;
+                if (!renderMode.isFirstPerson())
+                    transformation = new Transformation(new Vector3f(0, 90, 0), new Vector3f(-0.25f, 0, 0.3f), new Vector3f(1, 1, 1));
+                else
+                    transformation = new Transformation(new Vector3f(18, 81, 0), new Vector3f(0, 0, -0.15f), new Vector3f(1, 1, 1));
+
+                transformation.apply(leftHanded, matrices);
+            }
+        }
     }
 }

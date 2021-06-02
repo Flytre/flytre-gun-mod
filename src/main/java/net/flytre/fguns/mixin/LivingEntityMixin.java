@@ -1,7 +1,7 @@
 package net.flytre.fguns.mixin;
 
-import net.flytre.fguns.BulletDamageSource;
 import net.flytre.fguns.entity.Bullet;
+import net.flytre.fguns.entity.BulletDamageSource;
 import net.minecraft.entity.DamageUtil;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttribute;

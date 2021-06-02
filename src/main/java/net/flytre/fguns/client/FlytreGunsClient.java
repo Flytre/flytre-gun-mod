@@ -1,9 +1,11 @@
-package net.flytre.fguns;
+package net.flytre.fguns.client;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendereregistry.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.client.screenhandler.v1.ScreenRegistry;
+import net.flytre.fguns.FlytreGuns;
+import net.flytre.fguns.Packets;
 import net.flytre.fguns.entity.BulletEntityRenderer;
 import net.flytre.fguns.entity.BulletModel;
 import net.flytre.fguns.entity.BulletPacket;

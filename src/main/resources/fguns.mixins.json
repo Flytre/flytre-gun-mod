@@ -8,18 +8,10 @@
     "ZombieEntityMixin"
   ],
   "client": [
-    "ClientPlayerEntityMixin",
-    "ClientPlayNetworkHandlerMixin",
-    "ClientWorldMixin",
-    "GameRendererMixin",
-    "HeldItemFeatureRendererMixin",
-    "HeldItemRendererMixin",
-    "InGameHudMixin",
-    "ItemRendererMixin",
-    "MinecraftClientMixin",
-    "MobEntityRendererMixin",
-    "ModelLoaderMixin",
-    "ParticleManagerMixin"
+    "client.ClientPlayerEntityMixin", "client.ClientPlayNetworkHandlerMixin", "client.ClientWorldMixin",
+    "client.GameRendererMixin", "client.HeldItemFeatureRendererMixin", "client.HeldItemRendererMixin",
+    "client.InGameHudMixin", "client.ItemRendererMixin", "client.KeyboardInputMixin", "client.MinecraftClientMixin",
+    "client.MobEntityRendererMixin", "client.ModelLoaderMixin", "client.ParticleManagerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

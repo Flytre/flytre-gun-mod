@@ -1,6 +1,5 @@
 package net.flytre.fguns.mixin;
 
-import net.flytre.fguns.FlytreGuns;
 import net.flytre.fguns.entity.BloodbathGoal;
 import net.flytre.fguns.gun.AbstractGun;
 import net.minecraft.entity.EntityType;
@@ -34,9 +33,6 @@ public abstract class AbstractSkeletonEntityMixin extends HostileEntity {
 
     @Inject(method = "updateAttackType", at = @At("HEAD"), cancellable = true)
     public void fguns$gunAttackType(CallbackInfo ci) {
-
-        if (!FlytreGuns.MOB_AI_RELEASED)
-            return;
 
         if (this.world != null && !this.world.isClient) {
 

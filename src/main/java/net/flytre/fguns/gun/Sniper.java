@@ -2,6 +2,7 @@ package net.flytre.fguns.gun;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
+import com.google.gson.annotations.SerializedName;
 import net.flytre.fguns.FlytreGuns;
 import net.flytre.fguns.Sounds;
 import net.flytre.fguns.entity.Bullet;
@@ -28,8 +29,8 @@ public class Sniper extends AbstractGun {
 
     private final Multimap<EntityAttribute, EntityAttributeModifier> attributeModifiers;
 
-    protected Sniper(double damage, double armorPen, double rps, double dropoff, int spray, int range, int clipSize, double reloadTime, BulletProperties bulletProperties, boolean scope, double scopeZoom, SoundEvent fireSound, Item ammoItem, double speedModifier, double recoilMultiplier) {
-        super(damage, armorPen, rps, dropoff, spray, range, clipSize, reloadTime, bulletProperties, scope, scopeZoom, fireSound, ammoItem, recoilMultiplier);
+    protected Sniper(double damage, double armorPen, double rps, double dropoff, int spray, int range, int clipSize, double reloadTime, BulletProperties bulletProperties, boolean scope, double scopeZoom, SoundEvent fireSound, Item ammoItem, double speedModifier, double horizontalRecoil, double verticalRecoil) {
+        super(damage, armorPen, rps, dropoff, spray, range, clipSize, reloadTime, bulletProperties, scope, scopeZoom, fireSound, ammoItem, horizontalRecoil, verticalRecoil);
         ImmutableMultimap.Builder<EntityAttribute, EntityAttributeModifier> builder = ImmutableMultimap.builder();
         builder.put(EntityAttributes.GENERIC_MOVEMENT_SPEED, new EntityAttributeModifier(UUID.fromString("CB3F88D4-645B-4A38-C198-9C13A444A5CF"), "Weight modifier", speedModifier, EntityAttributeModifier.Operation.MULTIPLY_BASE));
         this.attributeModifiers = builder.build();
@@ -61,6 +62,7 @@ public class Sniper extends AbstractGun {
 
     public static class Builder extends AbstractGun.Builder<Sniper> {
 
+        @SerializedName("speed_modifier")
         protected double speedModifier = -.1;
 
         public Builder() {
@@ -73,7 +75,8 @@ public class Sniper extends AbstractGun {
             this.range = 100;
             this.dropoff = 0.0;
             this.spray = 17;
-            this.recoilMultiplier = 2.9;
+            this.horizontalRecoil = 2.9;
+            this.verticalRecoil = 2.9;
         }
 
         public void setSpeedModifier(double speedModifier) {
@@ -82,7 +85,7 @@ public class Sniper extends AbstractGun {
 
         @Override
         public Sniper build() {
-            return new Sniper(damage, armorPen, rps, dropoff, spray, range, clipSize, reloadTime, bulletProperties, scope, scopeZoom, fireSound, ammoItem, speedModifier, recoilMultiplier);
+            return new Sniper(damage, armorPen, rps, dropoff, spray, range, clipSize, reloadTime, bulletProperties, scope, scopeZoom, fireSound, ammoItem, speedModifier, horizontalRecoil, verticalRecoil);
         }
     }
 }

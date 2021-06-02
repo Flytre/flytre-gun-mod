@@ -1,6 +1,6 @@
-package net.flytre.fguns;
+package net.flytre.fguns.gun;
 
-import net.flytre.fguns.gun.AbstractGun;
+import net.flytre.fguns.FlytreGuns;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;

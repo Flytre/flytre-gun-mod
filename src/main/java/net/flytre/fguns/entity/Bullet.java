@@ -3,13 +3,13 @@ package net.flytre.fguns.entity;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.flytre.fguns.BulletDamageSource;
 import net.flytre.fguns.FlytreGuns;
 import net.flytre.fguns.Packets;
 import net.flytre.fguns.ParticleHelper;
 import net.flytre.fguns.flare.FlareWorld;
 import net.flytre.fguns.gun.BulletProperties;
 import net.flytre.fguns.gun.Shocker;
+import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.WorldRenderer;
@@ -36,6 +36,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.explosion.Explosion;
 
 import java.util.Collection;
+import java.util.Set;
 
 public class Bullet extends ThrownEntity {
 
@@ -192,6 +193,19 @@ public class Bullet extends ThrownEntity {
             double mY = prevY + (dY * i);
             double mZ = prevZ + (dZ * i);
             world.addParticle(ParticleTypes.SMOKE, mX, mY, mZ, 0, 0, 0);
+        }
+    }
+
+    @Override
+    protected void onBlockHit(BlockHitResult blockHitResult) {
+        super.onBlockHit(blockHitResult);
+
+        Set<Block> blocks = FlytreGuns.CONFIG_HANDLER.getConfig().getBreakableBlocks();
+        if (blocks.contains(world.getBlockState(blockHitResult.getBlockPos()).getBlock())) {
+            double dist = Math.sqrt(distSquared(initialPos.x, initialPos.z, getX(), getZ()));
+            double modifiedDamage = damage * Math.pow(1 - dropoff, dist);
+            if (modifiedDamage >= 10 || Math.random() * 10 < modifiedDamage)
+                world.breakBlock(blockHitResult.getBlockPos(), false);
         }
     }
 

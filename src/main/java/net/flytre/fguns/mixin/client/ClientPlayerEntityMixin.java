@@ -1,4 +1,4 @@
-package net.flytre.fguns.mixin;
+package net.flytre.fguns.mixin.client;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.input.Input;

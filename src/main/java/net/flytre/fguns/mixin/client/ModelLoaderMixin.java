@@ -1,4 +1,4 @@
-package net.flytre.fguns.mixin;
+package net.flytre.fguns.mixin.client;
 
 import net.flytre.fguns.config.CustomGunConfigHandler;
 import net.flytre.fguns.gun.AbstractGun;
@@ -42,7 +42,7 @@ public abstract class ModelLoaderMixin {
     public void fguns$overrideModelForCustomGuns(Identifier id, CallbackInfoReturnable<UnbakedModel> cir) {
         if (id.getNamespace().equals("fguns") && CustomGunConfigHandler.LOADED_GUNS.containsKey(id.getPath())) {
             for (AbstractGun item : AbstractGun.GUNS) {
-                if (item.getBulletProperties() == CustomGunConfigHandler.LOADED_GUNS.get(id.getPath()).getBulletProperties() && !CustomGunConfigHandler.CONFIG_ADDED_GUNS.contains(item)) {
+                if (item.getClass() == CustomGunConfigHandler.LOADED_GUNS.get(id.getPath()).getClass() && !CustomGunConfigHandler.CONFIG_ADDED_GUNS.contains(item)) {
                     Identifier id2 = Registry.ITEM.getId(item);
                     if (id instanceof ModelIdentifier) {
                         ModelIdentifier id3 = new ModelIdentifier(id2, ((ModelIdentifier) id).getVariant());

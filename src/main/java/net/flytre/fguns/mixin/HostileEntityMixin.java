@@ -1,6 +1,5 @@
 package net.flytre.fguns.mixin;
 
-import net.flytre.fguns.FlytreGuns;
 import net.flytre.fguns.entity.BloodbathGoal;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.mob.AbstractSkeletonEntity;
@@ -24,9 +23,6 @@ public abstract class HostileEntityMixin extends MobEntity {
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "<init>", at = @At("TAIL"))
     public void fguns$boom(CallbackInfo ci) {
-
-        if (!FlytreGuns.MOB_AI_RELEASED)
-            return;
 
         HostileEntity me = (HostileEntity) (Object) this;
         if (world != null && !world.isClient && !(me instanceof AbstractSkeletonEntity) && !(me instanceof ZombieEntity))
