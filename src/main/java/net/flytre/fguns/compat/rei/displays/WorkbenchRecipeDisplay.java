@@ -1,12 +1,11 @@
 package net.flytre.fguns.compat.rei.displays;
 
-import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.utils.CollectionUtils;
+import me.shedaniel.rei.api.common.entry.EntryIngredient;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.api.common.util.EntryIngredients;
 import net.flytre.fguns.workbench.WorkbenchRecipe;
 import net.flytre.flytre_lib.compat.rei.AbstractRecipeDisplay;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -17,14 +16,13 @@ public class WorkbenchRecipeDisplay extends AbstractRecipeDisplay<WorkbenchRecip
     }
 
 
-    //SHOULD BE List<EntryIngredient>
     @Override
-    public List<List<EntryStack>> createOutputs() {
-        return Collections.singletonList(Collections.singletonList(EntryStack.create(recipe.getOutput())));
+    public List<EntryIngredient> createOutputs() {
+        return Collections.singletonList(EntryIngredients.of(recipe.getOutput()));
     }
 
     @Override
-    public List<List<EntryStack>> createInputs() {
-        return new ArrayList<>(CollectionUtils.map(recipe.getIngredients(), ing -> EntryStack.ofItemStacks(Arrays.asList(ing.getMatchingStacksClient()))));
+    public List<EntryIngredient> createInputs() {
+        return CollectionUtils.map(recipe.getIngredients(), EntryIngredients::ofIngredient);
     }
 }

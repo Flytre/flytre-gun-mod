@@ -3,9 +3,10 @@ package net.flytre.fguns.compat.rei.categories;
 import com.google.common.collect.Lists;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.widgets.Widgets;
-import me.shedaniel.rei.gui.widget.Widget;
+import me.shedaniel.rei.api.client.gui.Renderer;
+import me.shedaniel.rei.api.client.gui.widgets.Widget;
+import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.flytre.fguns.compat.rei.FgunsPlugin;
 import net.flytre.fguns.workbench.WorkbenchRecipe;
 import net.flytre.flytre_lib.compat.rei.AbstractCustomCategory;
@@ -62,8 +63,9 @@ public class WorkbenchRecipeCategory extends AbstractCustomCategory<WorkbenchRec
         return widgets;
     }
 
+
     @Override
-    public @NotNull EntryStack getLogo() {
-        return EntryStack.create(FgunsPlugin.ICON_MAP.getOrDefault(getRecipeType(), () -> Items.BARRIER));
+    public @NotNull Renderer getIcon() {
+        return EntryStacks.of(FgunsPlugin.ICON_MAP.getOrDefault(getRecipeType(), () -> Items.BARRIER));
     }
 }
