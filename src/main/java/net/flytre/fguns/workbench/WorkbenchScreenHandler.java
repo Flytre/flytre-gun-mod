@@ -54,7 +54,7 @@ public class WorkbenchScreenHandler extends ScreenHandler {
     public ItemStack transferSlot(PlayerEntity player, int index) {
         ItemStack stack = ItemStack.EMPTY;
         Slot slot = this.slots.get(index);
-        if (slot != null && slot.hasStack()) {
+        if (slot.hasStack()) {
             stack = slot.getStack();
             if (index <= 26) {
                 if (!this.insertItem(stack, 27, 36, false))

@@ -14,7 +14,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
@@ -28,14 +28,12 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public abstract class AbstractGun extends Item {
 
     public static final List<AbstractGun> GUNS = new ArrayList<>();
+    private static final Random RANDOM = new Random();
     private final double damage;
     private final double armorPen;
     private final double rps;
@@ -264,7 +262,7 @@ public abstract class AbstractGun extends Item {
 
     protected void removeAmmo(PlayerEntity playerEntity) {
         if (!playerEntity.isCreative()) {
-            for (ItemStack item : playerEntity.inventory.main) {
+            for (ItemStack item : playerEntity.getInventory().main) {
                 if (item.getItem() == ammoItem) {
                     item.decrement(1);
                     break;
@@ -276,7 +274,7 @@ public abstract class AbstractGun extends Item {
     public void fireBullet(World world, LivingEntity user, Hand hand, @Nullable LivingEntity target, boolean semi) {
         Bullet bulletEntity = new Bullet(user, world);
         bulletEntity.setPos(user.getX(), user.getEyeY(), user.getZ());
-        Vec3d vel = getRotationVector(user.pitch, user.yaw).multiply(-0.03 * horizontalRecoil, -0.023 * verticalRecoil, -0.03 * horizontalRecoil);
+        Vec3d vel = getRotationVector(user.getPitch(), user.getYaw()).multiply(-0.03 * horizontalRecoil, -0.023 * verticalRecoil, -0.03 * horizontalRecoil);
         user.addVelocity(vel.x, vel.y, vel.z);
         user.velocityModified = true;
         setBulletVector(bulletEntity, user, target, semi);
@@ -369,7 +367,7 @@ public abstract class AbstractGun extends Item {
 
     public boolean hasAmmo(PlayerEntity player) {
         if (!player.isCreative()) {
-            for (ItemStack item : player.inventory.main) {
+            for (ItemStack item : player.getInventory().main) {
                 if (!item.isEmpty() && item.getItem() == ammoItem) {
                     return true;
                 }
@@ -391,15 +389,15 @@ public abstract class AbstractGun extends Item {
         if (user.isSneaking())
             tSpray = Math.max(0, Math.min((tSpray * 2) / 5, tSpray - 5));
         if (user instanceof PlayerEntity) {
-            float f = -MathHelper.sin(user.yaw * 0.017453292F) * MathHelper.cos(user.pitch * 0.017453292F);
-            float g = -MathHelper.sin(user.pitch * 0.017453292F);
-            float h = MathHelper.cos(user.yaw * 0.017453292F) * MathHelper.cos(user.pitch * 0.017453292F);
+            float f = -MathHelper.sin(user.getYaw() * 0.017453292F) * MathHelper.cos(user.getPitch() * 0.017453292F);
+            float g = -MathHelper.sin(user.getPitch() * 0.017453292F);
+            float h = MathHelper.cos(user.getYaw() * 0.017453292F) * MathHelper.cos(user.getPitch() * 0.017453292F);
             bullet.setVelocity(f, g, h, 3.0F, tSpray);
         } else {
             double d = target.getX() - user.getX();
             double e = target.getBodyY(0.33333D) - bullet.getY();
             double f = target.getZ() - user.getZ();
-            double g = MathHelper.sqrt(d * d + f * f);
+            double g = MathHelper.sqrt((float) (d * d + f * f));
             bullet.setVelocity(d, e + g * 0.03D, f, 3.0F, tSpray);
         }
     }
@@ -480,7 +478,7 @@ public abstract class AbstractGun extends Item {
         public int cooldown;
         private boolean fallFlying;
 
-        public GunNBTSerializer(CompoundTag tag, AbstractGun gun) {
+        public GunNBTSerializer(NbtCompound tag, AbstractGun gun) {
             this.clip = tag.contains("clip") ? tag.getInt("clip") : gun.getClipSize();
             this.reload = tag.contains("reload") ? tag.getInt("reload") : -1;
             this.cooldown = tag.contains("cooldown") ? tag.getInt("cooldown") : 0;
@@ -494,7 +492,7 @@ public abstract class AbstractGun extends Item {
         }
 
 
-        public void toTag(CompoundTag tag) {
+        public void toTag(NbtCompound tag) {
             tag.putInt("clip", clip);
             tag.putInt("reload", reload);
             tag.putInt("cooldown", cooldown);

@@ -63,7 +63,7 @@ public class Shocker extends AbstractGun {
     }
 
     private static LivingEntity getNextEntity(Bullet bullet, List<Entity> hit, LivingEntity currentEntity) {
-        TargetPredicate predicate = new TargetPredicate();
+        TargetPredicate predicate = TargetPredicate.createAttackable();
         Entity owner = bullet.getOwner();
 
         if (owner == null)

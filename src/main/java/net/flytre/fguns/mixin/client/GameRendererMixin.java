@@ -2,8 +2,8 @@ package net.flytre.fguns.mixin.client;
 
 import net.flytre.fguns.client.TempClientData;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.options.GameOptions;
-import net.minecraft.client.options.Perspective;
+import net.minecraft.client.option.GameOptions;
+import net.minecraft.client.option.Perspective;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
 import org.objectweb.asm.Opcodes;

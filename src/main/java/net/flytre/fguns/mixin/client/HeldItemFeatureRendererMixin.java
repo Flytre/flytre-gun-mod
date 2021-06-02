@@ -8,9 +8,9 @@ import net.minecraft.client.render.entity.feature.HeldItemFeatureRenderer;
 import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.render.entity.model.ModelWithArms;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.ZombieEntity;
+import net.minecraft.util.math.Vec3f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -29,7 +29,7 @@ public abstract class HeldItemFeatureRendererMixin<T extends LivingEntity, M ext
         if (livingEntity instanceof ZombieEntity) {
             if (livingEntity.getMainHandStack().getItem() instanceof AbstractGun) {
                 matrixStack.translate(0.0, -0.2, 0.1);
-                matrixStack.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(50));
+                matrixStack.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(50));
             }
         }
     }

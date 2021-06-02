@@ -1,7 +1,9 @@
 package net.flytre.fguns.workbench;
 
 import net.flytre.fguns.gun.AbstractGun;
+import net.flytre.fguns.workbench.StatList.StatEntry;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.EntryListWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
@@ -10,7 +12,7 @@ import net.minecraft.text.Text;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StatList extends EntryListWidget<StatList.StatEntry> {
+public class StatList extends EntryListWidget<StatEntry> {
     private final WorkbenchScreen screen;
 
 
@@ -47,7 +49,14 @@ public class StatList extends EntryListWidget<StatList.StatEntry> {
         }
     }
 
-    static class StatEntry extends EntryListWidget.Entry<StatList.StatEntry> {
+
+    //Narrator support
+    @Override
+    public void appendNarrations(NarrationMessageBuilder builder) {
+        return;
+    }
+
+    static class StatEntry extends Entry<StatEntry> {
 
         private final MinecraftClient client;
         private final String key;

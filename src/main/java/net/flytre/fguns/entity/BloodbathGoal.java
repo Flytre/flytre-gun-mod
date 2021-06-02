@@ -24,7 +24,7 @@ public class BloodbathGoal extends Goal {
         } else {
             this.hitman = hitman;
             this.mobSpeed = mobSpeed;
-            this.setControls(EnumSet.of(Goal.Control.MOVE, Goal.Control.LOOK));
+            this.setControls(EnumSet.of(Control.MOVE, Control.LOOK));
         }
     }
 

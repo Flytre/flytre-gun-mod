@@ -9,15 +9,15 @@ import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.util.math.MatrixStack;
 
+import java.util.HashMap;
+import java.util.List;
+
 public class BulletModel extends EntityModel<Bullet> {
-    private final ModelPart bb_main;
+    private final ModelPart main;
 
     public BulletModel() {
-        textureWidth = 16;
-        textureHeight = 16;
-        bb_main = new ModelPart(this);
-        bb_main.setPivot(0.0F, 24.0F, 0.0F);
-        bb_main.setTextureOffset(12, 0).addCuboid(-1.0F, -9.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F, false);
+        main = new ModelPart(List.of(new ModelPart.Cuboid(12, 0, -1.0F, -9.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F, 0.0F, 0.0F, false, 16, 16)), new HashMap<>());
+        main.setPivot(0.0F, 24.0F, 0.0F);
     }
 
     @Override
@@ -27,8 +27,7 @@ public class BulletModel extends EntityModel<Bullet> {
 
     @Override
     public void render(MatrixStack matrixStack, VertexConsumer buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
-
-        bb_main.render(matrixStack, buffer, packedLight, packedOverlay);
+        main.render(matrixStack, buffer, packedLight, packedOverlay);
     }
 
 }

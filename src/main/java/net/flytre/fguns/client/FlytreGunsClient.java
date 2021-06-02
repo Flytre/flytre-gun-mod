@@ -20,7 +20,7 @@ public class FlytreGunsClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
 
-        EntityRendererRegistry.INSTANCE.register(FlytreGuns.BULLET, (dispatcher, context) -> new BulletEntityRenderer(dispatcher, new BulletModel()));
+        EntityRendererRegistry.INSTANCE.register(FlytreGuns.BULLET, (ctx) -> new BulletEntityRenderer(ctx, new BulletModel()));
 
         hud = new HUD();
 

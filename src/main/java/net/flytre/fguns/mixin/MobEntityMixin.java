@@ -7,7 +7,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -29,13 +29,13 @@ public abstract class MobEntityMixin extends LivingEntity {
     @Shadow
     public abstract void equipStack(EquipmentSlot slot, ItemStack stack);
 
-    @Inject(method = "readCustomDataFromTag", at = @At("HEAD"))
-    public void fguns$readData(CompoundTag tag, CallbackInfo ci) {
+    @Inject(method = "readCustomDataFromNbt", at = @At("HEAD"))
+    public void fguns$readData(NbtCompound tag, CallbackInfo ci) {
         gunAdded = tag.getBoolean("gunAdded");
     }
 
-    @Inject(method = "writeCustomDataToTag", at = @At("HEAD"))
-    public void fguns$writeData(CompoundTag tag, CallbackInfo ci) {
+    @Inject(method = "writeCustomDataToNbt", at = @At("HEAD"))
+    public void fguns$writeData(NbtCompound tag, CallbackInfo ci) {
         tag.putBoolean("gunAdded", gunAdded);
     }
 

@@ -17,7 +17,7 @@ public class BulletPacket {
     }
 
     public BulletPacket(Entity entity) {
-        this(entity.getEntityId(), entity.getVelocity());
+        this(entity.getId(), entity.getVelocity());
     }
 
     public BulletPacket(int id, Vec3d velocity) {

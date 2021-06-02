@@ -64,9 +64,9 @@ public class Packets {
                         if (!(workbenchRecipe instanceof WorkbenchRecipe))
                             return;
                         WorkbenchRecipe actualRecipe = (WorkbenchRecipe) workbenchRecipe;
-                        if (actualRecipe.matches(player.inventory, player.world)) {
-                            ItemStack stack = actualRecipe.craft(player.inventory);
-                            stack = InventoryUtils.putStackInInventory(stack, player.inventory, 0, 36);
+                        if (actualRecipe.matches(player.getInventory(), player.world)) {
+                            ItemStack stack = actualRecipe.craft(player.getInventory());
+                            stack = InventoryUtils.putStackInInventory(stack, player.getInventory(), 0, 36);
                             if (!stack.isEmpty())
                                 player.world.spawnEntity(new ItemEntity(player.world, player.getX(), player.getY(), player.getZ(), stack));
                         }

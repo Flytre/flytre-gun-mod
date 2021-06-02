@@ -60,7 +60,7 @@ public class WorkbenchRecipe implements Recipe<PlayerInventory> {
         return output;
     }
 
-    public List<QuantifiedIngredient> getIngredients() {
+    public List<QuantifiedIngredient> getQuantifiedIngredients() {
         return ingredients;
     }
 
@@ -86,7 +86,7 @@ public class WorkbenchRecipe implements Recipe<PlayerInventory> {
     }
 
     @Environment(EnvType.CLIENT)
-    public ItemStack getRecipeKindIcon() {
+    public ItemStack createIcon() {
         return new ItemStack(FlytreGuns.WORKBENCH);
     }
 
@@ -96,7 +96,7 @@ public class WorkbenchRecipe implements Recipe<PlayerInventory> {
     }
 
     @Override
-    public DefaultedList<Ingredient> getPreviewInputs() {
+    public DefaultedList<Ingredient> getIngredients() {
         DefaultedList<Ingredient> def = DefaultedList.ofSize(ingredients.size(), Ingredient.EMPTY);
         List<Ingredient> ing = ingredients.stream().map(QuantifiedIngredient::getIngredient).collect(Collectors.toList());
         for (int i = 0; i < ing.size(); i++)

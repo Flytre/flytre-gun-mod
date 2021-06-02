@@ -27,11 +27,11 @@ import java.util.function.Function;
 public class FgunsPlugin implements REIPluginV0 {
 
     public static final Identifier PLUGIN = new Identifier("fguns", "plugin");
-    public static final Map<RecipeType<?>, ItemConvertible> iconMap = new HashMap<>();
+    public static final Map<RecipeType<?>, ItemConvertible> ICON_MAP = new HashMap<>();
     public static final List<RecipeType<?>> types = new ArrayList<>();
 
     public FgunsPlugin() {
-        iconMap.put(FlytreGuns.WORKBENCH_RECIPE, FlytreGuns.WORKBENCH);
+        ICON_MAP.put(FlytreGuns.WORKBENCH_RECIPE, FlytreGuns.WORKBENCH);
         types.addAll(Collections.singletonList(FlytreGuns.WORKBENCH_RECIPE));
     }
 
@@ -71,7 +71,7 @@ public class FgunsPlugin implements REIPluginV0 {
     @Override
     public void registerOthers(RecipeHelper recipeHelper) {
         for (RecipeType<?> type : types)
-            recipeHelper.registerWorkingStations(Registry.RECIPE_TYPE.getId(type), EntryStack.create(iconMap.get(type)));
+            recipeHelper.registerWorkingStations(Registry.RECIPE_TYPE.getId(type), EntryStack.create(ICON_MAP.get(type)));
     }
 
 

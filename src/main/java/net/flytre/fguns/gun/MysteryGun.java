@@ -9,14 +9,14 @@ import net.minecraft.world.World;
 
 public class MysteryGun extends Item {
     public MysteryGun() {
-        super(new Item.Settings().group(FlytreGuns.TAB).maxCount(1));
+        super(new Settings().group(FlytreGuns.TAB).maxCount(1));
     }
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
         if(entity instanceof PlayerEntity) {
             PlayerEntity living = (PlayerEntity) entity;
-            living.inventory.setStack(slot, new ItemStack(AbstractGun.randomGun(), 1));
+            living.getInventory().setStack(slot, new ItemStack(AbstractGun.randomGun(), 1));
         }
         super.inventoryTick(stack, world, entity, slot, selected);
     }

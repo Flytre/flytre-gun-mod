@@ -20,7 +20,6 @@ import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -29,7 +28,7 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
-
+import net.minecraft.util.math.Vec3f;
 import java.util.Map;
 import java.util.Objects;
 
@@ -127,8 +126,8 @@ public class WorkbenchScreen extends HandledScreen<WorkbenchScreenHandler> imple
         matrixStack.scale(3.3f, 3.3f, 3.3f);
         assert client.world != null;
         float rot = ((client.world.getTime() + delta) * 4) % 360;
-        matrixStack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(rot));
-        matrixStack.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(-30));
+        matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(rot));
+        matrixStack.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(-30));
         VertexConsumerProvider.Immediate immediate = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
         boolean bl = !model.isSideLit();
         if (bl) {

@@ -48,7 +48,7 @@ public class WorkbenchRecipeSerializer implements RecipeSerializer<WorkbenchReci
     @Override
     public void write(PacketByteBuf buf, WorkbenchRecipe recipe) {
         buf.writeItemStack(recipe.getOutput());
-        PacketUtils.toPacket(buf, recipe.getIngredients(), QuantifiedIngredient::toPacket);
+        PacketUtils.toPacket(buf, recipe.getQuantifiedIngredients(), QuantifiedIngredient::toPacket);
     }
 
     public interface RecipeFactory {

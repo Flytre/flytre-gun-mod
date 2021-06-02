@@ -13,11 +13,11 @@ import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.render.model.json.Transformation;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -40,7 +40,7 @@ public abstract class ItemRendererMixin {
         if (item instanceof AbstractGun) {
 
             AbstractGun gun = (AbstractGun) item;
-            CompoundTag tag = stack.getOrCreateTag();
+            NbtCompound tag = stack.getOrCreateTag();
 
             int clip = tag.contains("clip") ? tag.getInt("clip") : -1;
             int reload = tag.contains("reload") ? tag.getInt("reload") : -1;
@@ -109,9 +109,9 @@ public abstract class ItemRendererMixin {
             if (serializer.shouldRenderCustomPose()) {
                 Transformation transformation;
                 if (!renderMode.isFirstPerson())
-                    transformation = new Transformation(new Vector3f(0, 90, 0), new Vector3f(-0.25f, 0, 0.3f), new Vector3f(1, 1, 1));
+                    transformation = new Transformation(new Vec3f(0, 90, 0), new Vec3f(-0.25f, 0, 0.3f), new Vec3f(1, 1, 1));
                 else
-                    transformation = new Transformation(new Vector3f(18, 81, 0), new Vector3f(0, 0, -0.15f), new Vector3f(1, 1, 1));
+                    transformation = new Transformation(new Vec3f(18, 81, 0), new Vec3f(0, 0, -0.15f), new Vec3f(1, 1, 1));
 
                 transformation.apply(leftHanded, matrices);
             }

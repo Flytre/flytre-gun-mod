@@ -4,6 +4,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
+import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.fabricmc.fabric.api.screenhandler.v1.ScreenHandlerRegistry;
 import net.flytre.fguns.config.Config;
@@ -32,19 +33,16 @@ import net.minecraft.util.registry.Registry;
 public class FlytreGuns implements ModInitializer {
 
 
+    public static final AbstractGun LETHAL_MARK = new Pistol.Builder().setDamage(5).setArmorPen(.4).setRps(2).setDropoff(0.02).setSpray(3).setRange(30).setClipSize(10).setReloadTime(1.4).build();
+    public static final ItemGroup TAB = FabricItemGroupBuilder.build(
+            new Identifier("fguns", "all"),
+            () -> new ItemStack(FlytreGuns.LETHAL_MARK));
     //Item
     public static final Item BASIC_AMMO = new Item(new Item.Settings().group(FlytreGuns.TAB));
     public static final Item SHOTGUN_SHELL = new Item(new Item.Settings().group(FlytreGuns.TAB));
     public static final Item SNIPER_AMMO = new Item(new Item.Settings().group(FlytreGuns.TAB));
     public static final Item ROCKET_AMMO = new Item(new Item.Settings().group(FlytreGuns.TAB));
     public static final Item ENERGY_CELL = new Item(new Item.Settings().group(FlytreGuns.TAB));
-
-
-    public static final ItemGroup TAB = FabricItemGroupBuilder.build(
-            new Identifier("fguns", "all"),
-            () -> new ItemStack(FlytreGuns.LETHAL_MARK));
-
-    public static final AbstractGun LETHAL_MARK = new Pistol.Builder().setDamage(5).setArmorPen(.4).setRps(2).setDropoff(0.02).setSpray(3).setRange(30).setClipSize(10).setReloadTime(1.4).build();
     public static final AbstractGun BEAMER = new Pistol.Builder().setDamage(12).setArmorPen(.5).setRps(1).setDropoff(0.02).setSpray(3).setRange(30).setClipSize(6).setReloadTime(3.0).setScope(true).setScopeZoom(4).setHorizontalRecoil(1.4).build();
     public static final AbstractGun LASER_SPEED = new Pistol.Builder().setDamage(4).setArmorPen(.2).setRps(4).setDropoff(0.03).setSpray(6).setRange(25).setClipSize(20).setReloadTime(1.4).build();
 
@@ -117,7 +115,7 @@ public class FlytreGuns implements ModInitializer {
 
         Registry.register(Registry.BLOCK, new Identifier("fguns", "workbench"), WORKBENCH);
         Registry.register(Registry.ITEM, new Identifier("fguns", "workbench"), new BlockItem(WORKBENCH, new FabricItemSettings().group(TAB)));
-        WORKBENCH_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, new Identifier("fguns:workbench"), BlockEntityType.Builder.create(WorkbenchEntity::new, WORKBENCH).build(null));
+        WORKBENCH_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, new Identifier("fguns:workbench"), FabricBlockEntityTypeBuilder.create(WorkbenchEntity::new, WORKBENCH).build(null));
         WORKBENCH_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(new Identifier("fguns:workbench"), WorkbenchScreenHandler::new);
         WORKBENCH_RECIPE = Registry.register(Registry.RECIPE_TYPE, new Identifier("fguns:workbench"), new RecipeType<WorkbenchRecipe>() {
             public String toString() {

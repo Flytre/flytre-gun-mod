@@ -10,10 +10,10 @@ import net.minecraft.client.render.entity.feature.FeatureRendererContext;
 import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Arm;
+import net.minecraft.util.math.Vec3f;
 
 @Environment(EnvType.CLIENT)
 public class HeldGunFeatureRenderer<T extends LivingEntity, M extends EntityModel<T>> extends FeatureRenderer<T, M> {
@@ -45,8 +45,8 @@ public class HeldGunFeatureRenderer<T extends LivingEntity, M extends EntityMode
     private void renderItem(LivingEntity entity, ItemStack stack, ModelTransformation.Mode transformationMode, Arm arm, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
         if (!stack.isEmpty()) {
             matrices.push();
-            matrices.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(-90.0F));
-            matrices.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(180.0F));
+            matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(-90.0F));
+            matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(180.0F));
             boolean bl = arm == Arm.LEFT;
             matrices.translate(0, 0.125D, -0.625D);
             MinecraftClient.getInstance().getHeldItemRenderer().renderItem(entity, stack, transformationMode, bl, matrices, vertexConsumers, light);

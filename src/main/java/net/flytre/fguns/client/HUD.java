@@ -12,7 +12,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 
@@ -45,7 +45,7 @@ public class HUD {
         int x = client.getWindow().getScaledWidth() - 100;
         int y = client.getWindow().getScaledHeight() - 70;
 
-        if (player == null || player.inventory == null)
+        if (player == null || player.getInventory() == null)
             return;
 
         ItemStack stack = player.getOffHandStack();
@@ -58,22 +58,15 @@ public class HUD {
         AbstractGun gun = (AbstractGun) stack.getItem();
 
         int max = gun.getClipSize();
-        CompoundTag tag = stack.getOrCreateTag();
+        NbtCompound tag = stack.getOrCreateTag();
         int curr = tag.contains("clip") ? tag.getInt("clip") : gun.getClipSize();
         int reload = tag.contains("reload") ? tag.getInt("reload") : -1;
         int mode = tag.contains("mode") ? tag.getInt("mode") : 0;
-        Text modeText;
-        switch (mode) {
-            case 1:
-                modeText = new TranslatableText("text.fguns.burst");
-                break;
-            case 2:
-                modeText = new TranslatableText("text.fguns.semi");
-                break;
-            default:
-                modeText = new TranslatableText("text.fguns.auto");
-
-        }
+        Text modeText = switch (mode) {
+            case 1 -> new TranslatableText("text.fguns.burst");
+            case 2 -> new TranslatableText("text.fguns.semi");
+            default -> new TranslatableText("text.fguns.auto");
+        };
         Text gunText;
 
         if (reload != -1) {
@@ -105,9 +98,9 @@ public class HUD {
 
 
     public int countItem(Item item, PlayerEntity player) {
-        ArrayList<ItemStack> items = new ArrayList<>(player.inventory.main);
-        items.addAll(player.inventory.armor);
-        items.addAll(player.inventory.offHand);
+        ArrayList<ItemStack> items = new ArrayList<>(player.getInventory().main);
+        items.addAll(player.getInventory().armor);
+        items.addAll(player.getInventory().offHand);
 
         OptionalInt sum = items.stream().filter(i -> i.getItem() == item).mapToInt(ItemStack::getCount).reduce(Integer::sum);
         return sum.isPresent() ? sum.getAsInt() : 0;

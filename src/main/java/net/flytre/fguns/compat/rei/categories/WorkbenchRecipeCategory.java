@@ -64,6 +64,6 @@ public class WorkbenchRecipeCategory extends AbstractCustomCategory<WorkbenchRec
 
     @Override
     public @NotNull EntryStack getLogo() {
-        return EntryStack.create(FgunsPlugin.iconMap.getOrDefault(getRecipeType(), () -> Items.BARRIER));
+        return EntryStack.create(FgunsPlugin.ICON_MAP.getOrDefault(getRecipeType(), () -> Items.BARRIER));
     }
 }

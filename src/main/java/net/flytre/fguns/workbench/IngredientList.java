@@ -1,14 +1,16 @@
 package net.flytre.fguns.workbench;
 
+import net.flytre.fguns.workbench.IngredientList.IngredientEntry;
 import net.flytre.flytre_lib.common.recipe.QuantifiedIngredient;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.EntryListWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.TranslatableText;
 
-public class IngredientList extends EntryListWidget<IngredientList.IngredientEntry> {
+public class IngredientList extends EntryListWidget<IngredientEntry> {
 
     private final WorkbenchScreen screen;
 
@@ -34,7 +36,7 @@ public class IngredientList extends EntryListWidget<IngredientList.IngredientEnt
         clearEntries();
         WorkbenchRecipe recipe = screen.getCurrentRecipe();
         if (recipe != null) {
-            for (QuantifiedIngredient ingredient : recipe.getIngredients()) {
+            for (QuantifiedIngredient ingredient : recipe.getQuantifiedIngredients()) {
                 ItemStack[] stacks = ingredient.getMatchingStacksClient();
                 if (stacks.length > 0)
                     addEntry(new IngredientEntry(stacks[0], client, this));
@@ -43,7 +45,14 @@ public class IngredientList extends EntryListWidget<IngredientList.IngredientEnt
         }
     }
 
-    static class IngredientEntry extends EntryListWidget.Entry<IngredientEntry> {
+
+    //Narrator support
+    @Override
+    public void appendNarrations(NarrationMessageBuilder builder) {
+        return;
+    }
+
+    static class IngredientEntry extends Entry<IngredientEntry> {
 
         private final ItemStack stack;
         private final MinecraftClient client;

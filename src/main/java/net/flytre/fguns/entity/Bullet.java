@@ -22,7 +22,7 @@ import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.projectile.thrown.ThrownEntity;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.particle.BlockStateParticleEffect;
 import net.minecraft.particle.ParticleTypes;
@@ -66,7 +66,7 @@ public class Bullet extends ThrownEntity {
 
     public Bullet(double x, double y, double z, World world) {
         this(FlytreGuns.BULLET, world);
-        this.updatePosition(x, y, z);
+        this.setPosition(x, y, z);
         this.initialPos = new Vec3d(x, y, z);
     }
 
@@ -238,7 +238,7 @@ public class Bullet extends ThrownEntity {
 
         if (!this.world.isClient) {
             this.world.sendEntityStatus(this, (byte) 3);
-            this.remove();
+            this.discard();
         }
     }
 
@@ -250,9 +250,9 @@ public class Bullet extends ThrownEntity {
 
 
     @Override
-    public CompoundTag toTag(CompoundTag tag) {
+    public NbtCompound writeNbt(NbtCompound tag) {
 
-        CompoundTag initial = new CompoundTag();
+        NbtCompound initial = new NbtCompound();
         initial.putDouble("x", initialPos.x);
         initial.putDouble("y", initialPos.y);
         initial.putDouble("z", initialPos.z);
@@ -263,19 +263,19 @@ public class Bullet extends ThrownEntity {
         tag.putDouble("dropoff", dropoff);
         tag.putInt("range", range);
 
-        return super.toTag(tag);
+        return super.writeNbt(tag);
     }
 
     @Override
-    public void fromTag(CompoundTag tag) {
+    public void readNbt(NbtCompound tag) {
 
-        CompoundTag initial = tag.getCompound("initial");
+        NbtCompound initial = tag.getCompound("initial");
         initialPos = new Vec3d(initial.getDouble("x"), initial.getDouble("y"), initial.getDouble("z"));
         damage = tag.getDouble("damage");
         armorPen = tag.getDouble("armorPen");
         dropoff = tag.getDouble("dropoff");
         range = tag.getInt("range");
-        super.fromTag(tag);
+        super.readNbt(tag);
     }
 
     public void setProperties(double damage, double armorPen, double dropoff, int range) {

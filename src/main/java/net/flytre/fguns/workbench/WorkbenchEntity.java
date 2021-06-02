@@ -7,9 +7,10 @@ import net.flytre.fguns.Packets;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.math.BlockPos;
 
 import java.util.List;
 
@@ -17,8 +18,8 @@ public class WorkbenchEntity extends BlockEntity {
 
     private int currentIndex;
 
-    public WorkbenchEntity() {
-        super(FlytreGuns.WORKBENCH_ENTITY);
+    public WorkbenchEntity(BlockPos pos, BlockState state) {
+        super(FlytreGuns.WORKBENCH_ENTITY, pos, state);
     }
 
     public void nextRecipe() {
@@ -49,14 +50,14 @@ public class WorkbenchEntity extends BlockEntity {
     }
 
     @Override
-    public CompoundTag toTag(CompoundTag tag) {
+    public NbtCompound writeNbt(NbtCompound tag) {
         tag.putInt("cI", currentIndex);
-        return super.toTag(tag);
+        return super.writeNbt(tag);
     }
 
     @Override
-    public void fromTag(BlockState state, CompoundTag tag) {
+    public void readNbt(NbtCompound tag) {
         currentIndex = tag.getInt("cI");
-        super.fromTag(state, tag);
+        super.readNbt(tag);
     }
 }
