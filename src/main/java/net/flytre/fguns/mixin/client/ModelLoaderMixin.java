@@ -24,7 +24,7 @@ public abstract class ModelLoaderMixin {
 
     @Shadow
     @Final
-    public static ModelIdentifier MISSING;
+    public static ModelIdentifier MISSING_ID;
     @Shadow
     @Final
     private static Logger LOGGER;
@@ -66,7 +66,7 @@ public abstract class ModelLoaderMixin {
             throw new IllegalStateException("Circular reference while loading " + id);
         } else {
             this.modelsToLoad.add(id);
-            UnbakedModel unbakedModel = this.unbakedModels.get(MISSING);
+            UnbakedModel unbakedModel = this.unbakedModels.get(MISSING_ID);
 
             while (!this.modelsToLoad.isEmpty()) {
                 Identifier identifier = this.modelsToLoad.iterator().next();

@@ -24,12 +24,12 @@ public class WorkbenchRecipeCategory extends AbstractCustomCategory<WorkbenchRec
     public WorkbenchRecipeCategory(RecipeType<WorkbenchRecipe> recipeType) {
         super(recipeType);
     }
-
-    @NotNull
-    public String getCategoryName() {
-        return I18n.translate("recipe.fguns.workbench");
-    }
-
+//
+//    @NotNull
+//    public String getCategoryName() {
+//        return I18n.translate("recipe.fguns.workbench");
+//    }
+//
 
     @Override
     public @NotNull List<Widget> setupDisplay(AbstractRecipeDisplay<WorkbenchRecipe> recipeDisplay, Rectangle bounds) {

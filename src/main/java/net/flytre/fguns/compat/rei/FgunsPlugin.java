@@ -25,11 +25,11 @@ import java.util.*;
 public class FgunsPlugin implements REIClientPlugin {
 
     public static final Map<RecipeType<?>, ItemConvertible> ICON_MAP = new HashMap<>();
-    public static final List<RecipeType<?>> types = new ArrayList<>();
+    public static final List<RecipeType<?>> TYPES = new ArrayList<>();
 
     public FgunsPlugin() {
         ICON_MAP.put(FlytreGuns.WORKBENCH_RECIPE, FlytreGuns.WORKBENCH);
-        types.addAll(Collections.singletonList(FlytreGuns.WORKBENCH_RECIPE));
+        TYPES.addAll(Collections.singletonList(FlytreGuns.WORKBENCH_RECIPE));
     }
 
     @Override
@@ -46,7 +46,7 @@ public class FgunsPlugin implements REIClientPlugin {
     @Override
     public void registerCategories(CategoryRegistry registry) {
         registry.add(new WorkbenchRecipeCategory(FlytreGuns.WORKBENCH_RECIPE));
-        for (RecipeType<?> type : types)
+        for (RecipeType<?> type : TYPES)
             registry.addWorkstations(CategoryIdentifier.of(Registry.RECIPE_TYPE.getId(type)), EntryStacks.of(ICON_MAP.get(type)));
     }
 

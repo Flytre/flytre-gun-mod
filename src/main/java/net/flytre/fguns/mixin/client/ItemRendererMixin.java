@@ -85,7 +85,6 @@ public abstract class ItemRendererMixin {
     private void renderBar(float curr, float max, int x, int y) {
         RenderSystem.disableDepthTest();
         RenderSystem.disableTexture();
-        RenderSystem.disableAlphaTest();
         RenderSystem.disableBlend();
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder bufferBuilder = tessellator.getBuffer();
@@ -95,7 +94,6 @@ public abstract class ItemRendererMixin {
         renderGuiQuad(bufferBuilder, x + 2, y + 13, 13, 2, 0, 0, 0, 255);
         renderGuiQuad(bufferBuilder, x + 2, y + 13, i, 1, j >> 16 & 255, j >> 8 & 255, j & 255, 255);
         RenderSystem.enableBlend();
-        RenderSystem.enableAlphaTest();
         RenderSystem.enableTexture();
         RenderSystem.enableDepthTest();
     }

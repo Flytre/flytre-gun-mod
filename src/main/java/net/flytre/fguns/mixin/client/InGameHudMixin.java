@@ -7,9 +7,7 @@ import net.flytre.fguns.client.Key;
 import net.flytre.fguns.gun.AbstractGun;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.InGameHud;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.Item;
 import net.minecraft.util.Identifier;
@@ -59,12 +57,12 @@ public class InGameHudMixin {
         RenderSystem.disableDepthTest();
         RenderSystem.depthMask(false);
         RenderSystem.defaultBlendFunc();
-        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.disableAlphaTest();
-        this.client.getTextureManager().bindTexture(SCOPE);
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.setShaderTexture(0, SCOPE);
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder bufferBuilder = tessellator.getBuffer();
-        bufferBuilder.begin(7, VertexFormats.POSITION_TEXTURE);
+        bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
         bufferBuilder.vertex(0.0D, this.scaledHeight, -90.0D).texture(0.0F, 1.0F).next();
         bufferBuilder.vertex(this.scaledWidth, this.scaledHeight, -90.0D).texture(1.0F, 1.0F).next();
         bufferBuilder.vertex(this.scaledWidth, 0.0D, -90.0D).texture(1.0F, 0.0F).next();
@@ -72,7 +70,6 @@ public class InGameHudMixin {
         tessellator.draw();
         RenderSystem.depthMask(true);
         RenderSystem.enableDepthTest();
-        RenderSystem.enableAlphaTest();
-        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
 }

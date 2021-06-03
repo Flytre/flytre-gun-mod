@@ -28,15 +28,17 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
     // Fabric API. This is technically optional, but you probably want it anyway.
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    modImplementation("net.fabricmc.fabric-api:fabric-api:${project.fabric_version}") {
+        exclude(["group": null, "module": "fabric-renderer-indigo"])
+    }
 
     // PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
     // You may need to force-disable transitiveness on them.
     modImplementation 'com.github.Flytre:FlytreLib:9aa674eaa455b4bfb67611c939949eff1edd273f'
 
 
-    modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:6.0.245-alpha"
-    modRuntime "me.shedaniel:RoughlyEnoughItems-fabric:6.0.245-alpha"
+    modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:6.0.247-alpha"
+    modRuntime "me.shedaniel:RoughlyEnoughItems-fabric:6.0.247-alpha"
 }
 
 

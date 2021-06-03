@@ -39,8 +39,8 @@ public class ClientPlayNetworkHandlerMixin {
             int i = packet.getId();
             entity.updateTrackedPosition(d, e, f);
             entity.refreshPositionAfterTeleport(d, e, f);
-            entity.pitch = (float) (packet.getPitch() * 360) / 256.0F;
-            entity.yaw = (float) (packet.getYaw() * 360) / 256.0F;
+            entity.setPitch((float) (packet.getPitch() * 360) / 256.0F);
+            entity.setYaw((float) (packet.getYaw() * 360) / 256.0F);
             entity.setEntityId(i);
             entity.setUuid(packet.getUuid());
             this.world.addEntity(i, entity);

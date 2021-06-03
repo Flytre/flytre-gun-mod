@@ -19,6 +19,7 @@ import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.texture.SpriteAtlasTexture;
+import net.minecraft.client.texture.TextureManager;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
@@ -29,8 +30,8 @@ import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3f;
+
 import java.util.Map;
-import java.util.Objects;
 
 public class WorkbenchScreen extends HandledScreen<WorkbenchScreenHandler> implements CoordinateProvider {
 
@@ -67,7 +68,7 @@ public class WorkbenchScreen extends HandledScreen<WorkbenchScreenHandler> imple
     public void tick() {
         super.tick();
         assert client != null && client.player != null;
-        Map<Item, Integer> map = InventoryUtils.countInventoryContents(client.player.inventory);
+        Map<Item, Integer> map = InventoryUtils.countInventoryContents(client.player.getInventory());
         for (IngredientList.IngredientEntry entry : ingredientList.children())
             entry.setGreen(map.getOrDefault(entry.getStack().getItem(), 0) >= entry.getStack().getCount());
     }
@@ -100,31 +101,30 @@ public class WorkbenchScreen extends HandledScreen<WorkbenchScreenHandler> imple
     private void renderStack(float delta, ItemStack stack) {
         assert client != null;
         ItemRenderer renderer = client.getItemRenderer();
-        renderGuiItemModel(stack, this.x + 80, this.y + 42, renderer.getHeldItemModel(stack, null, null), delta);
+        renderGuiItemModel(stack, this.x + 80, this.y + 42, renderer.getHeldItemModel(stack, null, null, 0), delta);
     }
 
 
     //See ItemRenderer::renderInGUI
     @SuppressWarnings("deprecation")
     protected void renderGuiItemModel(ItemStack stack, int x, int y, BakedModel model, float delta) {
-        RenderSystem.pushMatrix();
         assert client != null;
+        TextureManager textureManager = client.getTextureManager();
         ItemRenderer renderer = client.getItemRenderer();
-        client.getTextureManager().bindTexture(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE);
-        Objects.requireNonNull(client.getTextureManager().getTexture(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE)).setFilter(false, false);
-        RenderSystem.enableRescaleNormal();
-        RenderSystem.enableAlphaTest();
-        RenderSystem.defaultAlphaFunc();
+
+        textureManager.getTexture(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE).setFilter(false, false);
+        RenderSystem.setShaderTexture(0, SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE);
         RenderSystem.enableBlend();
         RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
-        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.translatef((float) x, (float) y, 100.0F + renderer.zOffset);
-        RenderSystem.translatef(8.0F, 8.0F, 0.0F);
-        RenderSystem.scalef(1.0F, -1.0F, 1.0F);
-        RenderSystem.scalef(16.0F, 16.0F, 16.0F);
-        MatrixStack matrixStack = new MatrixStack();
-        matrixStack.scale(3.3f, 3.3f, 3.3f);
-        assert client.world != null;
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        MatrixStack matrixStack = RenderSystem.getModelViewStack();
+        matrixStack.push();
+        matrixStack.translate(x, y, 100.0F + renderer.zOffset);
+        matrixStack.translate(8.0D, 8.0D, 0.0D);
+        matrixStack.scale(1.0F, -1.0F, 1.0F);
+        matrixStack.scale(16.0F, 16.0F, 16.0F);
+        RenderSystem.applyModelViewMatrix();
+        MatrixStack matrixStack2 = new MatrixStack();
         float rot = ((client.world.getTime() + delta) * 4) % 360;
         matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(rot));
         matrixStack.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(-30));
@@ -133,36 +133,36 @@ public class WorkbenchScreen extends HandledScreen<WorkbenchScreenHandler> imple
         if (bl) {
             DiffuseLighting.disableGuiDepthLighting();
         }
-        renderer.renderItem(stack, ModelTransformation.Mode.GUI, false, matrixStack, immediate, 15728880, OverlayTexture.DEFAULT_UV, model);
+        assert client.world != null;
+        itemRenderer.renderItem(stack, ModelTransformation.Mode.GUI, false, matrixStack2, immediate, 15728880, OverlayTexture.DEFAULT_UV, model);
         immediate.draw();
         RenderSystem.enableDepthTest();
         if (bl) {
             DiffuseLighting.enableGuiDepthLighting();
         }
 
-        RenderSystem.disableAlphaTest();
-        RenderSystem.disableRescaleNormal();
-        RenderSystem.popMatrix();
+        matrixStack.pop();
+        RenderSystem.applyModelViewMatrix();
     }
 
 
     @Override
     protected void init() {
         super.init();
-        addButton(new ButtonWidget(this.x, this.y, 10, 20, new LiteralText("\u276E"), (button) -> {
+        addDrawableChild(new ButtonWidget(this.x, this.y, 10, 20, new LiteralText("\u276E"), (button) -> {
             PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
             buf.writeInt(-1);
             ClientPlayNetworking.send(Packets.NEXT_RECIPE, buf);
             ClientPlayNetworking.send(Packets.REQUEST_RECIPE, PacketByteBufs.empty());
         }));
-        addButton(new ButtonWidget(this.x + 166, this.y, 10, 20, new LiteralText("\u276F"), (button) -> {
+        addDrawableChild(new ButtonWidget(this.x + 166, this.y, 10, 20, new LiteralText("\u276F"), (button) -> {
             PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
             buf.writeInt(1);
             ClientPlayNetworking.send(Packets.NEXT_RECIPE, buf);
             ClientPlayNetworking.send(Packets.REQUEST_RECIPE, PacketByteBufs.empty());
         }));
 
-        addButton(new ButtonWidget(this.x + 198, this.y + 10, 80, 20, new TranslatableText("gui.fguns.assemble"), (button) -> {
+        addDrawableChild(new ButtonWidget(this.x + 198, this.y + 10, 80, 20, new TranslatableText("gui.fguns.assemble"), (button) -> {
             if (currentRecipe != null) {
                 PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
                 buf.writeIdentifier(currentRecipe.getId());
