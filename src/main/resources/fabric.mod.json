@@ -24,7 +24,7 @@
     "client": [
       "net.flytre.fguns.client.FlytreGunsClient"
     ],
-    "rei_plugins": [
+    "rei": [
       "net.flytre.fguns.compat.rei.FgunsPlugin"
     ]
   },
