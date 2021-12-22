@@ -121,7 +121,7 @@ public class WorkbenchScreen extends HandledScreen<WorkbenchScreenHandler> imple
     private void renderStack(float delta, ItemStack stack) {
         assert client != null;
         ItemRenderer renderer = client.getItemRenderer();
-        renderGuiItemModel(stack, this.x + 80, this.y + 42, renderer.getHeldItemModel(stack, null, null, 0), delta);
+        renderGuiItemModel(stack, this.x + 80, this.y + 42, renderer.getModel(stack, null, null, 0), delta);
     }
 
 

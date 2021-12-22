@@ -32,9 +32,9 @@
     "fguns.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=0.7.4",
+    "fabricloader": ">=0.10.8",
     "fabric": "*",
-    "minecraft": "1.17.x",
-    "flytre_lib": ">=1.3.6"
+    "minecraft": "1.18.x",
+    "flytre_lib": ">=1.4.4"
   }
 }

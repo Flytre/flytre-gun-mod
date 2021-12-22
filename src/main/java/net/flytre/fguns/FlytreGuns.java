@@ -17,7 +17,6 @@ import net.flytre.fguns.workbench.WorkbenchBlock;
 import net.flytre.fguns.workbench.WorkbenchRecipe;
 import net.flytre.fguns.workbench.WorkbenchRecipeSerializer;
 import net.flytre.fguns.workbench.WorkbenchScreenHandler;
-import net.flytre.flytre_lib.api.base.util.BakeHelper;
 import net.flytre.flytre_lib.api.base.util.PacketUtils;
 import net.flytre.flytre_lib.api.config.ConfigHandler;
 import net.flytre.flytre_lib.api.config.ConfigRegistry;
@@ -140,8 +139,6 @@ public class FlytreGuns implements ModInitializer {
         });
 
         Sounds.init();
-
-        BakeHelper.fullBake("fguns", "", null);
 
         PacketUtils.registerS2CPacket(BulletVelocityS2CPacket.class, BulletVelocityS2CPacket::new);
         PacketUtils.registerC2SPacket(GunActionC2SPacket.class, GunActionC2SPacket::new);
