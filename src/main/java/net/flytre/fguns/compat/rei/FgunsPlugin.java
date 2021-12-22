@@ -17,19 +17,18 @@ import net.flytre.fguns.workbench.WorkbenchRecipe;
 import net.flytre.fguns.workbench.WorkbenchScreen;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.recipe.RecipeType;
-import net.minecraft.util.registry.Registry;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 @Environment(EnvType.CLIENT)
 public class FgunsPlugin implements REIClientPlugin {
 
     public static final Map<RecipeType<?>, ItemConvertible> ICON_MAP = new HashMap<>();
-    public static final List<RecipeType<?>> TYPES = new ArrayList<>();
 
     public FgunsPlugin() {
         ICON_MAP.put(FlytreGuns.WORKBENCH_RECIPE, FlytreGuns.WORKBENCH);
-        TYPES.addAll(Collections.singletonList(FlytreGuns.WORKBENCH_RECIPE));
     }
 
     @Override
@@ -46,8 +45,7 @@ public class FgunsPlugin implements REIClientPlugin {
     @Override
     public void registerCategories(CategoryRegistry registry) {
         registry.add(new WorkbenchRecipeCategory(FlytreGuns.WORKBENCH_RECIPE));
-        for (RecipeType<?> type : TYPES)
-            registry.addWorkstations(CategoryIdentifier.of(Registry.RECIPE_TYPE.getId(type)), EntryStacks.of(ICON_MAP.get(type)));
+        registry.addWorkstations(CategoryIdentifier.of("fguns:workbench"),EntryStacks.of(FlytreGuns.WORKBENCH));
     }
 
     @Override

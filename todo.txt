@@ -1,14 +1,3 @@
-Enchantments: Infinity enchantment etc.
-Website: Extra TNT forge & Gun Mod
-reload bullet sound
-
-Changelog:
-Scopes!
-Shifting increases accuracy
-Custom HUD display
-Hit R to reload early
-Custom death messages
-Sounds
-Tooltips use translations
-Crafting recipes
-Mystery Gun; Random gun when crafted
+TODO: More gun properties (i.e. slime slow amount, rocket explosion amount)
+TODO: Bullets shoot from hand, not chest
+TODO: Config should use tags

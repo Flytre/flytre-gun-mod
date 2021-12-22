@@ -2,12 +2,10 @@ package net.flytre.fguns.workbench;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import io.netty.buffer.Unpooled;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.flytre.fguns.Packets;
-import net.flytre.flytre_lib.client.gui.CoordinateProvider;
-import net.flytre.flytre_lib.common.util.InventoryUtils;
+import net.flytre.fguns.FlytreGuns;
+import net.flytre.fguns.network.CraftGunC2SPacket;
+import net.flytre.flytre_lib.api.base.util.InventoryUtils;
+import net.flytre.flytre_lib.api.gui.CoordinateProvider;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -24,53 +22,65 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.recipe.Ingredient;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3f;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+
+import static net.flytre.fguns.client.TempClientData.currentRecipeIndex;
+
 
 public class WorkbenchScreen extends HandledScreen<WorkbenchScreenHandler> implements CoordinateProvider {
 
     private static final Identifier INVENTORY_TEXTURE = new Identifier("fguns:textures/gui/workbench_base.png");
     private static final Identifier PANEL_TEXTURE = new Identifier("fguns:textures/gui/workbench_side.png");
 
-    private WorkbenchRecipe currentRecipe = null;
+    private final List<WorkbenchRecipe> recipes;
+
     private IngredientList ingredientList;
     private StatList statList;
 
 
     public WorkbenchScreen(WorkbenchScreenHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
+        recipes = Objects.requireNonNull(MinecraftClient.getInstance().getNetworkHandler()).getRecipeManager().listAllOfType(FlytreGuns.WORKBENCH_RECIPE);
     }
 
     public WorkbenchRecipe getCurrentRecipe() {
-        return currentRecipe;
+        return recipes.get(currentRecipeIndex);
     }
 
-    public void setCurrentRecipe(WorkbenchRecipe currentRecipe) {
-        this.currentRecipe = currentRecipe;
+    public void setCurrentRecipe(int index) {
+
+        if (index == -1)
+            index = recipes.size() - 1;
+
+        index %= recipes.size();
+        currentRecipeIndex = index;
         ingredientList.refreshList();
         statList.refreshList();
     }
 
     @Override
     protected void drawForeground(MatrixStack matrices, int mouseX, int mouseY) {
-        if (currentRecipe != null) {
-            DrawableHelper.drawCenteredText(matrices, textRenderer, new TranslatableText(currentRecipe.getOutputItem().getTranslationKey()), this.backgroundWidth / 2, titleY, 4210752);
+        if (getCurrentRecipe() != null) {
+            DrawableHelper.drawCenteredText(matrices, textRenderer, new TranslatableText(getCurrentRecipe().getOutputItem().getTranslationKey()), this.backgroundWidth / 2, titleY, 4210752);
         }
     }
 
     @Override
-    public void tick() {
-        super.tick();
+    protected void handledScreenTick() {
         assert client != null && client.player != null;
         Map<Item, Integer> map = InventoryUtils.countInventoryContents(client.player.getInventory());
         for (IngredientList.IngredientEntry entry : ingredientList.children())
-            entry.setGreen(map.getOrDefault(entry.getStack().getItem(), 0) >= entry.getStack().getCount());
+            entry.setGreen(Arrays.stream(entry.getStacks()).anyMatch(i -> map.getOrDefault(i.getItem(),0) >= i.getCount()));
     }
 
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
@@ -84,18 +94,28 @@ public class WorkbenchScreen extends HandledScreen<WorkbenchScreenHandler> imple
     @Override
     protected void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY) {
         assert this.client != null;
-        if (currentRecipe != null) {
-            ItemStack stack = new ItemStack(currentRecipe.getOutputItem(), 1);
+        if (getCurrentRecipe() != null) {
+            ItemStack stack = new ItemStack(getCurrentRecipe().getOutputItem(), 1);
             renderStack(delta, stack);
         }
-        this.client.getTextureManager().bindTexture(INVENTORY_TEXTURE);
+
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.setShaderTexture(0, INVENTORY_TEXTURE);
         int i = this.x;
         int j = (this.height - this.backgroundHeight) / 2;
         this.drawTexture(matrices, i, j, 0, 0, this.backgroundWidth, this.backgroundHeight);
-        this.client.getTextureManager().bindTexture(PANEL_TEXTURE);
+
+        RenderSystem.setShaderTexture(0, PANEL_TEXTURE);
         this.drawTexture(matrices, this.x + 95, this.y, 0, 0, this.backgroundWidth + 100, this.backgroundHeight);
         this.drawTexture(matrices, this.x - 205, this.y, 0, 0, this.backgroundWidth + 100, this.backgroundHeight);
 
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+        if (ingredientList.isMouseOver(mouseX, mouseY))
+            return ingredientList.mouseScrolled(mouseX, mouseY, amount);
+        return super.mouseScrolled(mouseX, mouseY, amount);
     }
 
     private void renderStack(float delta, ItemStack stack) {
@@ -108,7 +128,7 @@ public class WorkbenchScreen extends HandledScreen<WorkbenchScreenHandler> imple
     //See ItemRenderer::renderInGUI
     @SuppressWarnings("deprecation")
     protected void renderGuiItemModel(ItemStack stack, int x, int y, BakedModel model, float delta) {
-        assert client != null;
+        assert client != null && client.world != null : "Null client or world found";
         TextureManager textureManager = client.getTextureManager();
         ItemRenderer renderer = client.getItemRenderer();
 
@@ -123,11 +143,12 @@ public class WorkbenchScreen extends HandledScreen<WorkbenchScreenHandler> imple
         matrixStack.translate(8.0D, 8.0D, 0.0D);
         matrixStack.scale(1.0F, -1.0F, 1.0F);
         matrixStack.scale(16.0F, 16.0F, 16.0F);
+        matrixStack.scale(3.0f, 3.0f, 3.0f);
         RenderSystem.applyModelViewMatrix();
         MatrixStack matrixStack2 = new MatrixStack();
         float rot = ((client.world.getTime() + delta) * 4) % 360;
-        matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(rot));
-        matrixStack.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(-30));
+        matrixStack2.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(rot));
+        matrixStack2.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(-30));
         VertexConsumerProvider.Immediate immediate = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
         boolean bl = !model.isSideLit();
         if (bl) {
@@ -149,36 +170,22 @@ public class WorkbenchScreen extends HandledScreen<WorkbenchScreenHandler> imple
     @Override
     protected void init() {
         super.init();
-        addDrawableChild(new ButtonWidget(this.x, this.y, 10, 20, new LiteralText("\u276E"), (button) -> {
-            PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
-            buf.writeInt(-1);
-            ClientPlayNetworking.send(Packets.NEXT_RECIPE, buf);
-            ClientPlayNetworking.send(Packets.REQUEST_RECIPE, PacketByteBufs.empty());
-        }));
-        addDrawableChild(new ButtonWidget(this.x + 166, this.y, 10, 20, new LiteralText("\u276F"), (button) -> {
-            PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
-            buf.writeInt(1);
-            ClientPlayNetworking.send(Packets.NEXT_RECIPE, buf);
-            ClientPlayNetworking.send(Packets.REQUEST_RECIPE, PacketByteBufs.empty());
-        }));
+        addDrawableChild(new ButtonWidget(this.x, this.y, 10, 20, new LiteralText("\u276E"), (button) -> setCurrentRecipe(currentRecipeIndex - 1)));
+        addDrawableChild(new ButtonWidget(this.x + 166, this.y, 10, 20, new LiteralText("\u276F"), (button) -> setCurrentRecipe(currentRecipeIndex + 1)));
 
         addDrawableChild(new ButtonWidget(this.x + 198, this.y + 10, 80, 20, new TranslatableText("gui.fguns.assemble"), (button) -> {
-            if (currentRecipe != null) {
-                PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
-                buf.writeIdentifier(currentRecipe.getId());
-                ClientPlayNetworking.send(Packets.CRAFT_ITEM, buf);
+            if (getCurrentRecipe() != null) {
+                assert client != null;
+                Objects.requireNonNull(client.getNetworkHandler()).sendPacket(new CraftGunC2SPacket(getCurrentRecipe().getId()));
             }
         }));
 
-        if (ingredientList == null) {
-            ingredientList = new IngredientList(client, 40, height, y + 100, this.y + 150, 20, this, x + 280);
-        }
+        ingredientList = new IngredientList(client, 95, height, y + 45, this.y + 145, 20, this, x + 188);
 
-        if (statList == null) {
-            statList = new StatList(client, 40, height, y + 5, this.y + 150, 25, this, x - 22);
-        }
+        statList = new StatList(client, 40, height, y + 5, this.y + 150, 25, this, x - 22);
 
-        ClientPlayNetworking.send(Packets.REQUEST_RECIPE, PacketByteBufs.empty());
+
+        setCurrentRecipe(currentRecipeIndex);
     }
 
     @Override

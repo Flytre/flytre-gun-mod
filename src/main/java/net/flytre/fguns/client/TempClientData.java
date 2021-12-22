@@ -9,4 +9,6 @@ public class TempClientData {
 
     public static AbstractGun gun = null;
     public static int shiftTime = 0;
+
+    public static int currentRecipeIndex = 0;
 }

@@ -1,85 +1,63 @@
 package net.flytre.fguns.config;
 
 import com.google.gson.annotations.SerializedName;
+import jdk.jfr.Description;
+import net.flytre.flytre_lib.api.config.reference.block.BlockReference;
+import net.flytre.flytre_lib.api.config.reference.block.ConfigBlock;
+import net.flytre.flytre_lib.api.config.reference.entity.ConfigEntity;
+import net.flytre.flytre_lib.api.config.reference.entity.EntityReference;
 import net.minecraft.block.Block;
-import net.minecraft.tag.BlockTags;
-import net.minecraft.util.Identifier;
+import net.minecraft.entity.EntityType;
 import net.minecraft.util.registry.Registry;
 
-import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static net.minecraft.entity.EntityType.*;
 
 public class Config {
 
-    @SerializedName("player_damage_modifier")
-    private final float playerDamageModifier;
-
-    @SerializedName("mob_damage_modifier")
-    private final float mobDamageModifier;
-
-    @SerializedName("mob_gun_spawn_chance")
-    private final float mobGunSpawnChance;
-
     @SerializedName("breakable_blocks")
-    private final String[] breakableBlocks;
+    @Description("The blocks guns can break")
+    public Set<ConfigBlock> breakableBlocks = Registry.BLOCK
+            .stream()
+            .map(Registry.BLOCK::getId)
+            .filter(i -> i.getNamespace().equals("minecraft") && i.getPath().contains("glass"))
+            .map(Registry.BLOCK::get)
+            .map(BlockReference::new)
+            .collect(Collectors.toSet());
+
+    @SerializedName("mobs_that_can_spawn_with_guns")
+    @Description("Mobs that can spawn holding guns")
+    public Set<ConfigEntity> mobGunWhitelist = Stream
+            .of(
+                    ZOMBIE, SKELETON, WITHER_SKELETON, STRAY,
+                    PIGLIN, ZOMBIFIED_PIGLIN, DROWNED, HUSK,
+                    PIGLIN_BRUTE, PILLAGER, WITCH, VINDICATOR
+            ).map(EntityReference::new).collect(Collectors.toSet());
+
+    @Description("The multiplier to gun damage when fired by players")
+    @SerializedName("player_damage_modifier")
+    public float playerDamageModifier = 1.0f;
 
 
-    private transient Set<Block> breakableBlockCache;
+    @Description("The multiplier to gun damage when fired by mobs")
+    @SerializedName("mob_damage_modifier")
+    public float mobDamageModifier = 0.25f;
 
 
-    public Config() {
-        playerDamageModifier = 1.0f;
-        mobDamageModifier = 0.25f;
-        mobGunSpawnChance = 0.02f;
-        breakableBlocks = new String[]{"#minecraft:impermeable",
-                "glass_pane",
-                "white_stained_glass_pane",
-                "orange_stained_glass_pane",
-                "magenta_stained_glass_pane",
-                "light_blue_stained_glass_pane",
-                "yellow_stained_glass_pane",
-                "lime_stained_glass_pane",
-                "pink_stained_glass_pane",
-                "gray_stained_glass_pane",
-                "light_gray_stained_glass_pane",
-                "cyan_stained_glass_pane",
-                "purple_stained_glass_pane",
-                "blue_stained_glass_pane",
-                "brown_stained_glass_pane",
-                "green_stained_glass_pane",
-                "red_stained_glass_pane",
-                "black_stained_glass_pane"
-        };
-    }
-
-    public float getPlayerDamageModifier() {
-        return playerDamageModifier;
-    }
-
-    public float getEntityDamageModifier() {
-        return mobDamageModifier;
-    }
-
-    public float getMobGunSpawnChance() {
-        return mobGunSpawnChance;
-    }
+    @Description("The chance a mob spawns with a gun")
+    @SerializedName("mob_gun_spawn_chance")
+    public float mobGunSpawnChance = 0.02f;
 
 
-    private Set<Block> genBreakableBlocks() {
-        Set<Block> result = new HashSet<>();
-        for (String str : breakableBlocks) {
-            if (str.startsWith("#")) {
-                result.addAll(Objects.requireNonNull(BlockTags.getTagGroup().getTag(new Identifier(str.substring(1)))).values());
-            } else
-                result.add(Registry.BLOCK.get(new Identifier(str)));
-        }
-        return result;
-    }
+    @Description("The power of rocket launcher explosions")
+    @SerializedName("rocket_explosion_power")
+    public float rocketExplosionPower = 3f;
 
-    public Set<Block> getBreakableBlocks() {
-        if (breakableBlockCache == null)
-            breakableBlockCache = genBreakableBlocks();
-        return breakableBlockCache;
-    }
+
+    @Description("Whether bullets on fire should set blocks on fire")
+    @SerializedName("flammable_griefing")
+    public boolean flammableGriefing = true;
 }

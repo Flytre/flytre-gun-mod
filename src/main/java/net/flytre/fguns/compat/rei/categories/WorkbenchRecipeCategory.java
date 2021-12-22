@@ -9,12 +9,12 @@ import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.flytre.fguns.compat.rei.FgunsPlugin;
 import net.flytre.fguns.workbench.WorkbenchRecipe;
-import net.flytre.flytre_lib.compat.rei.AbstractCustomCategory;
-import net.flytre.flytre_lib.compat.rei.AbstractRecipeDisplay;
-import net.flytre.flytre_lib.compat.rei.ArrowWidget;
-import net.minecraft.client.resource.language.I18n;
+import net.flytre.flytre_lib.api.compat.rei.AbstractCustomCategory;
+import net.flytre.flytre_lib.api.compat.rei.AbstractRecipeDisplay;
 import net.minecraft.item.Items;
 import net.minecraft.recipe.RecipeType;
+import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -24,12 +24,11 @@ public class WorkbenchRecipeCategory extends AbstractCustomCategory<WorkbenchRec
     public WorkbenchRecipeCategory(RecipeType<WorkbenchRecipe> recipeType) {
         super(recipeType);
     }
-//
-//    @NotNull
-//    public String getCategoryName() {
-//        return I18n.translate("recipe.fguns.workbench");
-//    }
-//
+
+    @Override
+    public @NotNull Text getTitle() {
+        return new TranslatableText("recipe.fguns.workbench");
+    }
 
     @Override
     public @NotNull List<Widget> setupDisplay(AbstractRecipeDisplay<WorkbenchRecipe> recipeDisplay, Rectangle bounds) {
@@ -58,8 +57,7 @@ public class WorkbenchRecipeCategory extends AbstractCustomCategory<WorkbenchRec
             widgets.add(Widgets.createSlot(new Point(x + w / 4 - 9, y + 3 * h / 4 - 15)).entries(getInput(recipeDisplay, 3)).markInput());
 
         widgets.add(Widgets.createSlot(new Point(x + 3 * w / 4 - 9, y + h / 2 - 9)).entries(getOutput(recipeDisplay, 0)).markOutput());
-        widgets.add(new ArrowWidget(new Rectangle(x + w / 2 - 12, y + h / 2 - 9, 24, 7)));
-
+        widgets.add(Widgets.createArrow(new Point(x + w / 2 - 12, y + h / 2 - 9)));
         return widgets;
     }
 

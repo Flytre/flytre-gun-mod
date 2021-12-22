@@ -1,11 +1,9 @@
 package net.flytre.fguns.gun;
 
 import net.flytre.fguns.FlytreGuns;
-import net.flytre.fguns.Sounds;
 import net.flytre.fguns.entity.Bullet;
+import net.flytre.fguns.misc.Sounds;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.Item;
-import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Hand;
@@ -14,8 +12,8 @@ import net.minecraft.world.World;
 public class RocketLauncher extends AbstractGun {
 
 
-    protected RocketLauncher(double damage, double armorPen, double rps, double dropoff, int spray, int range, int clipSize, double reloadTime, BulletProperties bulletProperties, boolean scope, double scopeZoom, SoundEvent fireSound, Item ammoItem, double horizontalRecoil, double verticalRecoil) {
-        super(damage, armorPen, rps, dropoff, spray, range, clipSize, reloadTime, bulletProperties, scope, scopeZoom, fireSound, ammoItem, horizontalRecoil, verticalRecoil);
+    private RocketLauncher(Builder builder) {
+        super(builder);
     }
 
     @Override
@@ -23,15 +21,11 @@ public class RocketLauncher extends AbstractGun {
         return new TranslatableText("text.fguns.tooltip.damage.varies");
     }
 
-    @Override
-    public void bulletSetup(World world, LivingEntity user, Hand hand, Bullet bullet) {
-        bullet.setVelocity(bullet.getVelocity().multiply(0.4));
-        super.bulletSetup(world, user, hand, bullet);
-    }
 
-    public static class Builder extends AbstractGun.Builder<RocketLauncher> {
+    public static class Builder extends AbstractGun.Builder<Builder> {
 
         public Builder() {
+            velocity = 0.4f;
             bulletProperties = BulletProperties.ROCKET;
             fireSound = Sounds.ROCKET_FIRE_EVENT;
             ammoItem = FlytreGuns.ROCKET_AMMO;
@@ -43,8 +37,13 @@ public class RocketLauncher extends AbstractGun {
         }
 
         @Override
+        protected Builder self() {
+            return this;
+        }
+
+        @Override
         public RocketLauncher build() {
-            return new RocketLauncher(damage, armorPen, rps, dropoff, spray, range, clipSize, reloadTime, bulletProperties, scope, scopeZoom, fireSound, ammoItem, horizontalRecoil, verticalRecoil);
+            return new RocketLauncher(this);
         }
     }
 }

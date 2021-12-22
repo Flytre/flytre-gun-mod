@@ -19,6 +19,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+/**
+ * Draw scope overlay
+ */
 @Environment(EnvType.CLIENT)
 @Mixin(InGameHud.class)
 public class InGameHudMixin {
@@ -52,7 +55,6 @@ public class InGameHudMixin {
     }
 
     @Unique
-    @SuppressWarnings("deprecation")
     private void renderScopeOverlay() {
         RenderSystem.disableDepthTest();
         RenderSystem.depthMask(false);

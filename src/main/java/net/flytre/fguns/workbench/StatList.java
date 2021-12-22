@@ -53,7 +53,6 @@ public class StatList extends EntryListWidget<StatEntry> {
     //Narrator support
     @Override
     public void appendNarrations(NarrationMessageBuilder builder) {
-        return;
     }
 
     static class StatEntry extends Entry<StatEntry> {

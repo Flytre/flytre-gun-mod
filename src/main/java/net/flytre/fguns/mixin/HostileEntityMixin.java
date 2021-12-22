@@ -12,6 +12,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+/**
+ * Gun AI for hostile mobs in general
+ */
 @Mixin(HostileEntity.class)
 public abstract class HostileEntityMixin extends MobEntity {
 

@@ -1,26 +1,27 @@
 package net.flytre.fguns.mixin;
 
+import net.flytre.fguns.FlytreGuns;
+import net.flytre.fguns.config.Config;
 import net.flytre.fguns.gun.AbstractGun;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.mob.HostileEntity;
+import net.flytre.flytre_lib.api.config.reference.entity.ConfigEntity;
+import net.minecraft.entity.*;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.world.LocalDifficulty;
+import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+/**
+ * Mobs can spawn holding guns
+ */
 @Mixin(MobEntity.class)
 public abstract class MobEntityMixin extends LivingEntity {
-
-    @Unique
-    private boolean gunAdded = false;
 
     protected MobEntityMixin(EntityType<? extends LivingEntity> entityType, World world) {
         super(entityType, world);
@@ -29,28 +30,16 @@ public abstract class MobEntityMixin extends LivingEntity {
     @Shadow
     public abstract void equipStack(EquipmentSlot slot, ItemStack stack);
 
-    @Inject(method = "readCustomDataFromNbt", at = @At("HEAD"))
-    public void fguns$readData(NbtCompound tag, CallbackInfo ci) {
-        gunAdded = tag.getBoolean("gunAdded");
-    }
 
-    @Inject(method = "writeCustomDataToNbt", at = @At("HEAD"))
-    public void fguns$writeData(NbtCompound tag, CallbackInfo ci) {
-        tag.putBoolean("gunAdded", gunAdded);
-    }
-
-
-    @SuppressWarnings("ConstantConditions")
-    @Inject(method = "tick", at = @At("TAIL"))
-    public void fguns$holdGun(CallbackInfo ci) {
-
-        if (!gunAdded) {
+    @Inject(method = "initialize", at = @At("TAIL"))
+    public void fguns$holdGun(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, EntityData entityData, NbtCompound entityNbt, CallbackInfoReturnable<EntityData> cir) {
+        Config cfg = FlytreGuns.CONFIG.getConfig();
+        if (ConfigEntity.contains(cfg.mobGunWhitelist,this.getType(),world.toServerWorld())) {
             AbstractGun item = AbstractGun.getRandomEquipmentGun();
-            if (item == null || !((Object) this instanceof HostileEntity))
+            if (item == null)
                 return;
             ItemStack stack = new ItemStack(item, 1);
             equipStack(EquipmentSlot.MAINHAND, stack);
-            gunAdded = true;
         }
     }
 }

@@ -1,5 +1,6 @@
 package net.flytre.fguns.workbench;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
@@ -18,19 +19,13 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
-public class WorkbenchBlock extends BlockWithEntity {
+public class WorkbenchBlock extends Block {
 
     private static final Text TITLE = new TranslatableText("container.fguns.work_bench");
 
 
     public WorkbenchBlock(Settings settings) {
         super(settings);
-    }
-
-    @Nullable
-    @Override
-    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
-        return new WorkbenchEntity(pos, state);
     }
 
     @Override
@@ -49,8 +44,9 @@ public class WorkbenchBlock extends BlockWithEntity {
         }
     }
 
+    @Override
     public NamedScreenHandlerFactory createScreenHandlerFactory(BlockState state, World world, BlockPos pos) {
-        return new SimpleNamedScreenHandlerFactory((i, playerInventory, playerEntity) -> new WorkbenchScreenHandler(i, playerInventory, ScreenHandlerContext.create(world, pos)), TITLE);
+        return new SimpleNamedScreenHandlerFactory((i, playerInventory, playerEntity) -> new WorkbenchScreenHandler(i, playerInventory), TITLE);
     }
 
 

@@ -23,6 +23,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+/**
+ * No gun bobbing when NBT updated
+ * Custom minigun first person rendering
+ */
 @Environment(EnvType.CLIENT)
 @Mixin(value = HeldItemRenderer.class, priority = 100)
 public abstract class HeldItemRendererMixin {

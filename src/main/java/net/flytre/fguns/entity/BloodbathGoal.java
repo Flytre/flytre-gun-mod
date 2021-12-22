@@ -39,7 +39,7 @@ public class BloodbathGoal extends Goal {
     }
 
     public int getRange() {
-        return getHeldGun().getRange();
+        return (int) (getHeldGun().getVelocity() * 30);
     }
 
     public int getSquaredRange() {
@@ -94,7 +94,7 @@ public class BloodbathGoal extends Goal {
 
         if (bl) {
             ItemStack stack = hitman.getStackInHand(Hand.MAIN_HAND);
-            AbstractGun.GunNBTSerializer serializer = new AbstractGun.GunNBTSerializer(stack.getOrCreateTag(), getHeldGun());
+            AbstractGun.GunNBTSerializer serializer = new AbstractGun.GunNBTSerializer(stack.getOrCreateNbt(), getHeldGun());
             if (serializer.clip != 0 || serializer.cooldown != 0)
                 getHeldGun().action(hitman.world, hitman, Hand.MAIN_HAND, target, false);
         }
@@ -103,7 +103,7 @@ public class BloodbathGoal extends Goal {
     public void tickGun() {
         ItemStack stack = hitman.getMainHandStack();
         AbstractGun gun = getHeldGun();
-        AbstractGun.GunNBTSerializer serializer = new AbstractGun.GunNBTSerializer(stack.getOrCreateTag(), gun);
+        AbstractGun.GunNBTSerializer serializer = new AbstractGun.GunNBTSerializer(stack.getOrCreateNbt(), gun);
         if (serializer.reload != -1 || serializer.clip == 0) {
             if (serializer.reload >= 0) {
                 double ammoCalc = (double) gun.getClipSize() / ((int) (gun.getReloadTime() * 20));
@@ -127,6 +127,6 @@ public class BloodbathGoal extends Goal {
         }
         if (serializer.cooldown > 0)
             serializer.cooldown--;
-        serializer.toTag(stack.getOrCreateTag());
+        serializer.toTag(stack.getOrCreateNbt());
     }
 }

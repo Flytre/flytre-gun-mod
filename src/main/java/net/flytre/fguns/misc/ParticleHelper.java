@@ -1,4 +1,4 @@
-package net.flytre.fguns;
+package net.flytre.fguns.misc;
 
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;

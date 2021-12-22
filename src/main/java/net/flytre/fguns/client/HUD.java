@@ -58,7 +58,7 @@ public class HUD {
         AbstractGun gun = (AbstractGun) stack.getItem();
 
         int max = gun.getClipSize();
-        NbtCompound tag = stack.getOrCreateTag();
+        NbtCompound tag = stack.getOrCreateNbt();
         int curr = tag.contains("clip") ? tag.getInt("clip") : gun.getClipSize();
         int reload = tag.contains("reload") ? tag.getInt("reload") : -1;
         int mode = tag.contains("mode") ? tag.getInt("mode") : 0;

@@ -15,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -22,7 +23,7 @@ public class CustomGunConfigHandler {
 
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().registerTypeAdapter(Item.class, new ItemSerializer()).create();
-    public static HashMap<String, AbstractGun> LOADED_GUNS = new HashMap<>();
+    public static Map<String, AbstractGun> LOADED_GUNS = new HashMap<>();
     public static Set<AbstractGun> CONFIG_ADDED_GUNS = new HashSet<>();
 
     public static void handleConfig() {
@@ -53,41 +54,19 @@ public class CustomGunConfigHandler {
         String type = obj.get("type").getAsString();
         String id = obj.get("id").getAsString();
         String name = obj.get("name").getAsString();
-        AbstractGun.Builder<?> builder;
-        switch (type) {
-            case "flare_gun":
-                builder = GSON.fromJson(obj, FlareGun.Builder.class);
-                break;
-            case "minigun":
-                builder = GSON.fromJson(obj, Minigun.Builder.class);
-                break;
-            case "pistol":
-                builder = GSON.fromJson(obj, Pistol.Builder.class);
-                break;
-            case "rifle":
-                builder = GSON.fromJson(obj, Rifle.Builder.class);
-                break;
-            case "rocket_launcher":
-                builder = GSON.fromJson(obj, RocketLauncher.Builder.class);
-                break;
-            case "shocker":
-                builder = GSON.fromJson(obj, Shocker.Builder.class);
-                break;
-            case "shotgun":
-                builder = GSON.fromJson(obj, Shotgun.Builder.class);
-                break;
-            case "slime_gun":
-                builder = GSON.fromJson(obj, SlimeGun.Builder.class);
-                break;
-            case "smg":
-                builder = GSON.fromJson(obj, Smg.Builder.class);
-                break;
-            case "sniper":
-                builder = GSON.fromJson(obj, Sniper.Builder.class);
-                break;
-            default:
-                throw new RuntimeException("Invalid type of gun: " + type + " in file " + file.getName());
-        }
+        AbstractGun.Builder<?> builder = switch (type) {
+            case "flare_gun" -> GSON.fromJson(obj, FlareGun.Builder.class);
+            case "minigun" -> GSON.fromJson(obj, Minigun.Builder.class);
+            case "pistol" -> GSON.fromJson(obj, Pistol.Builder.class);
+            case "rifle" -> GSON.fromJson(obj, Rifle.Builder.class);
+            case "rocket_launcher" -> GSON.fromJson(obj, RocketLauncher.Builder.class);
+            case "shocker" -> GSON.fromJson(obj, Shocker.Builder.class);
+            case "shotgun" -> GSON.fromJson(obj, Shotgun.Builder.class);
+            case "slime_gun" -> GSON.fromJson(obj, SlimeGun.Builder.class);
+            case "smg" -> GSON.fromJson(obj, Smg.Builder.class);
+            case "sniper" -> GSON.fromJson(obj, Sniper.Builder.class);
+            default -> throw new RuntimeException("Invalid type of gun: " + type + " in file " + file.getName());
+        };
         createGun(builder, name, id);
     }
 

@@ -2,39 +2,38 @@ package net.flytre.fguns.client;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.flytre.fguns.Packets;
+import net.flytre.fguns.network.GunActionC2SPacket;
+import net.flytre.flytre_lib.api.base.util.KeyBindUtils;
+import net.flytre.flytre_lib.api.event.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import org.lwjgl.glfw.GLFW;
 
 @Environment(EnvType.CLIENT)
 public class Key {
-    public static KeyBinding reload;
-    public static KeyBinding firingPattern;
-    public static KeyBinding scope;
+    public static KeyBinding RELOAD;
+    public static KeyBinding FIRING_PATTERN;
+    public static KeyBinding SCOPE;
 
     public static boolean SCOPED = false;
 
 
     public static void init() {
-        reload = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+        RELOAD = KeyBindUtils.register(new KeyBinding(
                 "key.fguns.reload",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_R,
                 "category.fguns.main"
         ));
-        firingPattern = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+        FIRING_PATTERN = KeyBindUtils.register(new KeyBinding(
                 "key.fguns.mode",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_M,
                 "category.fguns.main"
         ));
-        scope = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+         SCOPE = KeyBindUtils.register(new KeyBinding(
                 "key.fguns.scope",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_LEFT_SHIFT,
@@ -45,20 +44,22 @@ public class Key {
     public static void keyBindCode() {
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            while (reload.wasPressed()) {
-                ClientPlayNetworking.send(Packets.RELOAD, PacketByteBufs.empty());
+            while (RELOAD.wasPressed()) {
+                ClientPlayNetworkHandler handler = client.getNetworkHandler();
+                if (handler != null)
+                    handler.sendPacket(new GunActionC2SPacket(GunActionC2SPacket.Action.RELOAD));
             }
         });
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            while (firingPattern.wasPressed()) {
-                ClientPlayNetworking.send(Packets.FIRING_PATTERN, PacketByteBufs.empty());
+            while (FIRING_PATTERN.wasPressed()) {
+                ClientPlayNetworkHandler handler = client.getNetworkHandler();
+                if (handler != null)
+                    handler.sendPacket(new GunActionC2SPacket(GunActionC2SPacket.Action.CYCLE_FIRING_PATTERN));
             }
         });
 
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            SCOPED = scope.isPressed() || (scope.isUnbound() && MinecraftClient.getInstance().options.keySneak.isPressed());
-        });
+        ClientTickEvents.END_CLIENT_TICK.register(client -> SCOPED = SCOPE.isPressed() || (SCOPE.isUnbound() && MinecraftClient.getInstance().options.keySneak.isPressed()));
     }
 
 }

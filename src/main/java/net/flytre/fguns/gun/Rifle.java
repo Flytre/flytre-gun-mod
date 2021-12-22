@@ -1,16 +1,14 @@
 package net.flytre.fguns.gun;
 
-import net.flytre.fguns.Sounds;
-import net.minecraft.item.Item;
-import net.minecraft.sound.SoundEvent;
+import net.flytre.fguns.misc.Sounds;
 
 public class Rifle extends AbstractGun {
 
-    protected Rifle(double damage, double armorPen, double rps, double dropoff, int spray, int range, int clipSize, double reloadTime, BulletProperties bulletProperties, boolean scope, double scopeZoom, SoundEvent fireSound, Item ammoItem, double horizontalRecoil, double verticalRecoil) {
-        super(damage, armorPen, rps, dropoff, spray, range, clipSize, reloadTime, bulletProperties, scope, scopeZoom, fireSound, ammoItem, horizontalRecoil, verticalRecoil);
+    private Rifle(Builder builder) {
+        super(builder);
     }
 
-    public static class Builder extends AbstractGun.Builder<Rifle> {
+    public static class Builder extends AbstractGun.Builder<Builder> {
 
         public Builder() {
             super();
@@ -18,8 +16,13 @@ public class Rifle extends AbstractGun {
         }
 
         @Override
+        protected Builder self() {
+            return this;
+        }
+
+        @Override
         public Rifle build() {
-            return new Rifle(damage, armorPen, rps, dropoff, spray, range, clipSize, reloadTime, bulletProperties, scope, scopeZoom, fireSound, ammoItem, horizontalRecoil, verticalRecoil);
+            return new Rifle(this);
         }
     }
 }

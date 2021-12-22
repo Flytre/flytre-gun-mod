@@ -2,8 +2,8 @@ package net.flytre.fguns.mixin;
 
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.flytre.fguns.FlytreGuns;
-import net.flytre.fguns.Sounds;
 import net.flytre.fguns.flare.FlareWorld;
+import net.flytre.fguns.misc.Sounds;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -27,6 +27,9 @@ import java.util.Map;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
+/**
+ * VFX / SFX for flare thru FlareWorld implementation
+ */
 @Mixin(ServerWorld.class)
 public abstract class FlareWorldMixin extends World implements FlareWorld {
 

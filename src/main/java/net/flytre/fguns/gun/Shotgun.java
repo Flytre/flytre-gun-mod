@@ -2,10 +2,8 @@ package net.flytre.fguns.gun;
 
 import com.google.gson.annotations.SerializedName;
 import net.flytre.fguns.FlytreGuns;
-import net.flytre.fguns.Sounds;
+import net.flytre.fguns.misc.Sounds;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.Item;
-import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Hand;
@@ -15,9 +13,10 @@ public class Shotgun extends AbstractGun {
 
     private final int pelletCount;
 
-    protected Shotgun(double damage, double armorPen, double rps, double dropoff, int spray, int range, int clipSize, double reloadTime, BulletProperties bulletProperties, boolean scope, double scopeZoom, SoundEvent fireSound, Item ammoItem, int pelletCount, double horizontalRecoil, double verticalRecoil) {
-        super(damage, armorPen, rps, dropoff, spray, range, clipSize, reloadTime, bulletProperties, scope, scopeZoom, fireSound, ammoItem, horizontalRecoil, verticalRecoil);
-        this.pelletCount = pelletCount;
+
+    private Shotgun(Builder builder) {
+        super(builder);
+        this.pelletCount = builder.pelletCount;
     }
 
     public int getPelletCount() {
@@ -37,7 +36,7 @@ public class Shotgun extends AbstractGun {
         return new TranslatableText("text.fguns.tooltip.damage.shotgun", String.format("%.1f", getDamage()));
     }
 
-    public static class Builder extends AbstractGun.Builder<Shotgun> {
+    public static class Builder extends AbstractGun.Builder<Builder> {
 
         @SerializedName("pellet_count")
         protected int pelletCount = 5;
@@ -51,13 +50,18 @@ public class Shotgun extends AbstractGun {
             this.horizontalRecoil = 1.4;
         }
 
-        public void setPelletCount(int pelletCount) {
+        @Override
+        protected Builder self() {
+            return this;
+        }
+
+        public void pelletCount(int pelletCount) {
             this.pelletCount = pelletCount;
         }
 
         @Override
         public Shotgun build() {
-            return new Shotgun(damage, armorPen, rps, dropoff, spray, range, clipSize, reloadTime, bulletProperties, scope, scopeZoom, fireSound, ammoItem, pelletCount, horizontalRecoil, verticalRecoil);
+            return new Shotgun(this);
         }
     }
 }

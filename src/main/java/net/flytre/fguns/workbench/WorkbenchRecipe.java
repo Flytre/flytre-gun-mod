@@ -3,8 +3,8 @@ package net.flytre.fguns.workbench;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.flytre.fguns.FlytreGuns;
-import net.flytre.flytre_lib.common.recipe.QuantifiedIngredient;
-import net.flytre.flytre_lib.common.util.InventoryUtils;
+import net.flytre.flytre_lib.api.base.util.InventoryUtils;
+import net.flytre.flytre_lib.api.storage.recipe.QuantifiedIngredient;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -33,7 +33,7 @@ public class WorkbenchRecipe implements Recipe<PlayerInventory> {
         this.ingredients = ingredients;
         this.id = id;
         this.stackOutput = new ItemStack(output, 1);
-        stackOutput.getOrCreateTag().putInt("clip", 0);
+        stackOutput.getOrCreateNbt().putInt("clip", 0);
     }
 
     @Override

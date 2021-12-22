@@ -19,6 +19,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Custom config added guns get models auto loaded based on type
+ */
 @Mixin(ModelLoader.class)
 public abstract class ModelLoaderMixin {
 

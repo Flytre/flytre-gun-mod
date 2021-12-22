@@ -32,6 +32,7 @@
   "itemGroup.fguns.all": "Flytre's Gun Mod",
   "key.fguns.mode": "Switch Firing Pattern",
   "key.fguns.reload": "Reload",
+  "key.fguns.scope": "Scope",
   "text.fguns.auto": "Auto",
   "text.fguns.burst": "Burst",
   "text.fguns.semi": "Semi",
@@ -43,7 +44,7 @@
   "text.fguns.tooltip.damage.varies": "§7Damage: Varies",
   "text.fguns.tooltip.dropoff": "§7Dropoff: %s%% per block",
   "text.fguns.tooltip.dropoff.increase": "§7Damage Increase: %s%% per block",
-  "text.fguns.tooltip.range": "§7Range: %s blocks",
+  "text.fguns.tooltip.velocity": "§7Velocity: %s%%",
   "text.fguns.tooltip.rps": "§7RPS: %s",
   "recipe.fguns.workbench": "Workbench"
 }

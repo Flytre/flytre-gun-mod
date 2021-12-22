@@ -1,10 +1,10 @@
 package net.flytre.fguns.gun;
 
 import net.flytre.fguns.FlytreGuns;
-import net.flytre.fguns.Sounds;
 import net.flytre.fguns.entity.Bullet;
 import net.flytre.fguns.entity.BulletDamageSource;
-import net.flytre.flytre_lib.common.util.ParticleUtils;
+import net.flytre.fguns.misc.Sounds;
+import net.flytre.flytre_lib.api.base.util.ParticleUtils;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -25,8 +25,8 @@ import java.util.List;
 
 public class Shocker extends AbstractGun {
 
-    protected Shocker(double damage, double armorPen, double rps, double dropoff, int spray, int range, int clipSize, double reloadTime, BulletProperties bulletProperties, boolean scope, double scopeZoom, SoundEvent fireSound, Item ammoItem, double horizontalRecoil, double verticalRecoil) {
-        super(damage, armorPen, rps, dropoff, spray, range, clipSize, reloadTime, bulletProperties, scope, scopeZoom, fireSound, ammoItem, horizontalRecoil, verticalRecoil);
+    private Shocker(Builder builder) {
+        super(builder);
     }
 
     public static void chain(Bullet bullet, EntityHitResult entityHitResult, float damage) {
@@ -78,7 +78,7 @@ public class Shocker extends AbstractGun {
     }
 
 
-    public static class Builder extends AbstractGun.Builder<Shocker> {
+    public static class Builder extends AbstractGun.Builder<Builder> {
 
         public Builder() {
             super();
@@ -88,8 +88,13 @@ public class Shocker extends AbstractGun {
         }
 
         @Override
+        protected Builder self() {
+            return this;
+        }
+
+        @Override
         public Shocker build() {
-            return new Shocker(damage, armorPen, rps, dropoff, spray, range, clipSize, reloadTime, bulletProperties, scope, scopeZoom, fireSound, ammoItem, horizontalRecoil, verticalRecoil);
+            return new Shocker(this);
         }
     }
 }

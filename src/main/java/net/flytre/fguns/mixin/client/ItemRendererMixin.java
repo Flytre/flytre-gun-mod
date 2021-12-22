@@ -3,6 +3,7 @@ package net.flytre.fguns.mixin.client;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.flytre.fguns.FlytreGuns;
 import net.flytre.fguns.gun.AbstractGun;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.BufferBuilder;
@@ -25,6 +26,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+/**
+ * Draw gun cooldowns in the GUI ender-pearl / durability style
+ * Custom rotation when reloading
+ */
 @Environment(EnvType.CLIENT)
 @Mixin(value = ItemRenderer.class, priority = 500)
 public abstract class ItemRendererMixin {
@@ -40,7 +45,7 @@ public abstract class ItemRendererMixin {
         if (item instanceof AbstractGun) {
 
             AbstractGun gun = (AbstractGun) item;
-            NbtCompound tag = stack.getOrCreateTag();
+            NbtCompound tag = stack.getOrCreateNbt();
 
             int clip = tag.contains("clip") ? tag.getInt("clip") : -1;
             int reload = tag.contains("reload") ? tag.getInt("reload") : -1;
@@ -81,7 +86,6 @@ public abstract class ItemRendererMixin {
     }
 
     @Unique
-    @SuppressWarnings("deprecation")
     private void renderBar(float curr, float max, int x, int y) {
         RenderSystem.disableDepthTest();
         RenderSystem.disableTexture();
@@ -103,7 +107,11 @@ public abstract class ItemRendererMixin {
     public void fguns$reloadTransformation(ItemStack stack, ModelTransformation.Mode renderMode, boolean leftHanded, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, BakedModel model, CallbackInfo ci) {
 
         if (stack.getItem() instanceof AbstractGun && renderMode != ModelTransformation.Mode.GUI && renderMode != ModelTransformation.Mode.GROUND) {
-            AbstractGun.GunNBTSerializer serializer = new AbstractGun.GunNBTSerializer(stack.getOrCreateTag(), (AbstractGun) stack.getItem());
+
+            if(stack.getItem() == FlytreGuns.MINIGUN)
+                return;
+
+            AbstractGun.GunNBTSerializer serializer = new AbstractGun.GunNBTSerializer(stack.getOrCreateNbt(), (AbstractGun) stack.getItem());
             if (serializer.shouldRenderCustomPose()) {
                 Transformation transformation;
                 if (!renderMode.isFirstPerson())

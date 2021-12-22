@@ -1,16 +1,15 @@
 package net.flytre.fguns.entity;
 
-import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.flytre.fguns.FlytreGuns;
-import net.flytre.fguns.Packets;
-import net.flytre.fguns.ParticleHelper;
 import net.flytre.fguns.flare.FlareWorld;
 import net.flytre.fguns.gun.BulletProperties;
 import net.flytre.fguns.gun.Shocker;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
+import net.flytre.fguns.misc.ParticleHelper;
+import net.flytre.fguns.network.BulletVelocityS2CPacket;
+import net.flytre.flytre_lib.api.config.reference.block.ConfigBlock;
+import net.minecraft.advancement.criterion.Criteria;
+import net.minecraft.block.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.entity.Entity;
@@ -22,21 +21,30 @@ import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.projectile.thrown.ThrownEntity;
+import net.minecraft.item.FlintAndSteelItem;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.particle.BlockStateParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.state.property.Properties;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
+import net.minecraft.world.event.GameEvent;
 import net.minecraft.world.explosion.Explosion;
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public class Bullet extends ThrownEntity {
 
@@ -52,8 +60,7 @@ public class Bullet extends ThrownEntity {
     private double damage;
     private double armorPen;
     private double dropoff;
-    private int range;
-    private Vec3d initialPos;
+    private Vec3d initialPos = new Vec3d(0, 0, 0);
     private double initialSpeed = -1;
 
     private Vec3d lastVelocity;
@@ -101,7 +108,12 @@ public class Bullet extends ThrownEntity {
         super.onEntityHit(entityHitResult);
         Entity entity = entityHitResult.getEntity();
 
-        double dist = Math.sqrt(distSquared(initialPos.x, initialPos.z, getX(), getZ()));
+        if (getFireTicks() > 0) {
+            entity.setFireTicks(80);
+        }
+
+
+        double dist = world.isClient ? 0 : Math.sqrt(distSquared(initialPos.x, initialPos.z, getX(), getZ()));
         double modifiedDamage = damage * Math.pow(1 - dropoff, dist);
 
         if (getProperties() == BulletProperties.SHOCKER)
@@ -133,31 +145,22 @@ public class Bullet extends ThrownEntity {
     @Override
     public void tick() {
 
-        //Knock bullet outside range
-        if (!world.isClient && !this.hasNoGravity() && distSquared(initialPos.x, initialPos.z, getX(), getZ()) >= range * range) {
-            Vec3d vec3d2 = this.getVelocity();
-            this.setVelocity(vec3d2.x, vec3d2.y - 0.12, vec3d2.z);
-        }
-
-        //Keep Speed High
-        if (initialSpeed == -1) {
-            initialSpeed = getVelocity().getX() * getVelocity().getX() + getVelocity().getZ() * getVelocity().getZ();
-        } else {
-            double currentSpeed = getVelocity().getX() * getVelocity().getX() + getVelocity().getZ() * getVelocity().getZ();
-            if (currentSpeed / initialSpeed < 0.9) {
-                setVelocity(getVelocity().multiply(1.1));
-            }
-        }
+//        //Keep Speed High
+//        if (initialSpeed == -1) {
+//            initialSpeed = getVelocity().getX() * getVelocity().getX() + getVelocity().getZ() * getVelocity().getZ();
+//        } else {
+//            double currentSpeed = getVelocity().getX() * getVelocity().getX() + getVelocity().getZ() * getVelocity().getZ();
+//            if (currentSpeed / initialSpeed < 0.9) {
+//                setVelocity(getVelocity().multiply(1.1));
+//            }
+//        }
 
         if (!world.isClient) {
 
             if (lastVelocity != getVelocity()) {
                 Collection<ServerPlayerEntity> players = PlayerLookup.tracking(this);
                 for (ServerPlayerEntity playerEntity : players) {
-                    BulletPacket packet = new BulletPacket(this);
-                    PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
-                    packet.write(buf);
-                    ServerPlayNetworking.send(playerEntity, Packets.BULLET_VELOCITY, buf);
+                    playerEntity.networkHandler.sendPacket(new BulletVelocityS2CPacket(this));
                 }
             }
 
@@ -200,12 +203,29 @@ public class Bullet extends ThrownEntity {
     protected void onBlockHit(BlockHitResult blockHitResult) {
         super.onBlockHit(blockHitResult);
 
-        Set<Block> blocks = FlytreGuns.CONFIG_HANDLER.getConfig().getBreakableBlocks();
-        if (blocks.contains(world.getBlockState(blockHitResult.getBlockPos()).getBlock())) {
+        Set<ConfigBlock> blocks = FlytreGuns.CONFIG.getConfig().breakableBlocks;
+        if (ConfigBlock.contains(blocks, world.getBlockState(blockHitResult.getBlockPos()).getBlock(), world)) {
             double dist = Math.sqrt(distSquared(initialPos.x, initialPos.z, getX(), getZ()));
             double modifiedDamage = damage * Math.pow(1 - dropoff, dist);
             if (modifiedDamage >= 10 || Math.random() * 10 < modifiedDamage)
                 world.breakBlock(blockHitResult.getBlockPos(), false);
+        }
+
+        if (getFireTicks() > 0 && FlytreGuns.CONFIG.getConfig().flammableGriefing) {
+            BlockPos blockPos = blockHitResult.getBlockPos();
+            BlockState blockState = world.getBlockState(blockPos);
+            if (!CampfireBlock.canBeLit(blockState) && !CandleBlock.canBeLit(blockState) && !CandleCakeBlock.canBeLit(blockState)) {
+                BlockPos blockPos2 = blockPos.offset(blockHitResult.getSide());
+                if (AbstractFireBlock.canPlaceAt(world, blockPos2, Direction.NORTH)) {
+                    world.playSound(null, blockPos2, SoundEvents.ITEM_FIRECHARGE_USE, SoundCategory.BLOCKS, 1.0F, world.getRandom().nextFloat() * 0.4F + 0.8F);
+                    BlockState blockState2 = AbstractFireBlock.getState(world, blockPos2);
+                    world.setBlockState(blockPos2, blockState2, Block.NOTIFY_ALL | Block.REDRAW_ON_MAIN_THREAD);
+                }
+            } else {
+                world.playSound(null, blockPos, SoundEvents.ITEM_FIRECHARGE_USE, SoundCategory.BLOCKS, 1.0F, world.getRandom().nextFloat() * 0.4F + 0.8F);
+                world.setBlockState(blockPos, blockState.with(Properties.LIT, true), Block.NOTIFY_ALL | Block.REDRAW_ON_MAIN_THREAD);
+            }
+
         }
     }
 
@@ -229,7 +249,8 @@ public class Bullet extends ThrownEntity {
 
         if (getProperties() == BulletProperties.ROCKET) {
             boolean bl = this.world.getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING);
-            this.world.createExplosion(getOwner(), this.getX(), this.getY(), this.getZ(), 3f, bl, bl ? Explosion.DestructionType.DESTROY : Explosion.DestructionType.NONE);
+            float power = FlytreGuns.CONFIG.getConfig().rocketExplosionPower;
+            this.world.createExplosion(getOwner(), this.getX(), this.getY(), this.getZ(), power, bl, bl ? Explosion.DestructionType.DESTROY : Explosion.DestructionType.NONE);
         }
 
         if (getProperties() == BulletProperties.FLARE && !world.isClient && hitResult instanceof BlockHitResult) {
@@ -261,7 +282,6 @@ public class Bullet extends ThrownEntity {
         tag.putDouble("damage", damage);
         tag.putDouble("armorPen", armorPen);
         tag.putDouble("dropoff", dropoff);
-        tag.putInt("range", range);
 
         return super.writeNbt(tag);
     }
@@ -274,15 +294,13 @@ public class Bullet extends ThrownEntity {
         damage = tag.getDouble("damage");
         armorPen = tag.getDouble("armorPen");
         dropoff = tag.getDouble("dropoff");
-        range = tag.getInt("range");
         super.readNbt(tag);
     }
 
-    public void setProperties(double damage, double armorPen, double dropoff, int range) {
+    public void setProperties(double damage, double armorPen, double dropoff) {
         this.damage = damage;
         this.armorPen = armorPen;
         this.dropoff = dropoff;
-        this.range = range;
     }
 
     public double distSquared(double x1, double y1, double x2, double y2) {
@@ -299,10 +317,6 @@ public class Bullet extends ThrownEntity {
 
     public double getDropoff() {
         return dropoff;
-    }
-
-    public int getRange() {
-        return range;
     }
 
 }
